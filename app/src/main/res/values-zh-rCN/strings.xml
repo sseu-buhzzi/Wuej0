@@ -1,0 +1,29 @@
+<resources>
+	<string name="app_name">位_0</string>
+	<string name="main_maps">輿圖</string>
+	<string name="main_setting">諸置</string>
+	<string name="maps_unknown_longitude">某經</string>
+	<string name="maps_unknown_latitude">某緯</string>
+	<string name="maps_location_unavailable">失位矣</string>
+	<string name="setting_provider">源</string>
+	<string name="setting_provider_network">网絡</string>
+	<string name="setting_provider_gps">GPS</string>
+	<string name="setting_provider_gps_hardware">GPS 硬件</string>
+	<string name="setting_provider_passive">受</string>
+	<string name="setting_provider_fused">混</string>
+	<string name="setting_min_time">隙時</string>
+	<string name="setting_min_time_0">短</string>
+	<string name="setting_min_time_1">4096ms</string>
+	<string name="setting_min_time_2">16384ms</string>
+	<string name="setting_min_time_3">65536ms</string>
+	<string name="setting_min_distance">隙距</string>
+	<string name="setting_min_distance_0">短</string>
+	<string name="setting_min_distance_1">4m</string>
+	<string name="setting_min_distance_2">16m</string>
+	<string name="setting_min_distance_3">64m</string>
+	<string name="setting_server_addr">服務致</string>
+	<string name="setting_download_caching">下載匿</string>
+	<string name="setting_download_caching_clear">清</string>
+	<string name="setting_download_caching_trim">裁</string>
+	<string name="setting_download_cached">已匿 %s</string>
+</resources>

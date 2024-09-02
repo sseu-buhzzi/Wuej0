@@ -1,6 +1,7 @@
 package com.buhzzi.wuej_0.kit;
 
 import android.os.Handler;
+import android.os.Looper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,15 +11,15 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
-public class request_helper {
+public class RequestHelper {
 	public static class result {
 		public int code;
 		public String msg;
-		public Map<String, List<String>> fields;
+		public List<String[]> fields;
 		public byte[] body;
-		public result(int code, String msg, Map<String, List<String>> fields, byte[] body) {
+		public result(int code, String msg, List<String[]> fields, byte[] body) {
 			this.code = code;
 			this.msg = msg;
 			this.fields = fields;
@@ -26,17 +27,17 @@ public class request_helper {
 		}
 	}
 	public interface callback {
-		void succ(result rsp_res);
+		void succ(result rspRes);
 		void fail(Exception e);
 	}
 	public interface json_callback {
 		void response(int code, String msg, JSONObject data);
-		default callback to_callback() {
+		default callback toCallback() {
 			return new callback() {
-				@Override public void succ(result rsp_res) {
-					final JSONObject body_obj;
+				@Override public void succ(result rspRes) {
+					final JSONObject bodyObj;
 					try {
-						body_obj = new JSONObject(new String(rsp_res.body));
+						bodyObj = new JSONObject(new String(rspRes.body));
 					} catch (JSONException e) {
 						e.printStackTrace();
 						response(-1, null, null);
@@ -44,21 +45,21 @@ public class request_helper {
 					}
 					int body_code;
 					try {
-						body_code = body_obj.getInt("code");
+						body_code = bodyObj.getInt("code");
 					} catch (JSONException e) {
 						e.printStackTrace();
 						body_code = -1;
 					}
 					String body_msg;
 					try {
-						body_msg = body_obj.getString("msg");
+						body_msg = bodyObj.getString("msg");
 					} catch (JSONException e) {
 						e.printStackTrace();
 						body_msg = null;
 					}
 					JSONObject data;
 					try {
-						data = body_obj.getJSONObject("data");
+						data = bodyObj.getJSONObject("data");
 					} catch (JSONException e) {
 						e.printStackTrace();
 						data = null;
@@ -72,14 +73,14 @@ public class request_helper {
 			};
 		}
 	}
-	public static <conn_type extends HttpURLConnection> result request_sync(String method, String url, Map<String, String> fields, byte[] body) throws Exception {
+	public static <ConnType extends HttpURLConnection> result requestSync(String method, String url, List<String[]> fields, byte[] body) throws Exception {
 		final byte[] rsp_body;
-		final conn_type conn = (conn_type) new URL(url).openConnection();
+		final ConnType conn = (ConnType) new URL(url).openConnection();
 		try {
 			conn.setRequestMethod(method);
 			conn.setDoOutput(body != null && body.length != 0);
-			for (final String field : fields.keySet()) {
-				conn.addRequestProperty(field, fields.get(field));
+			for (final String[] field : fields) {
+				conn.addRequestProperty(field[0], field[1]);
 			}
 			conn.connect();
 			if (conn.getDoOutput()) {
@@ -88,7 +89,7 @@ public class request_helper {
 				}
 			}
 			try (final InputStream is = conn.getInputStream()) {
-				rsp_body = stream_helper.read_input_stream(is);
+				rsp_body = StreamHelper.readInputStream(is);
 			}
 		} finally {
 			conn.disconnect();
@@ -97,26 +98,28 @@ public class request_helper {
 		return new result(
 			conn.getResponseCode(),
 			conn.getResponseMessage(),
-			conn.getHeaderFields(),
+			conn.getHeaderFields().entrySet().stream().flatMap(entry -> {
+				final String key = entry.getKey();
+				return entry.getValue().stream().map(value -> new String[]{key, value});
+			}).collect(Collectors.toList()),
 			rsp_body
 		);
 	}
-	public static <conn_type extends HttpURLConnection> void request(String method, String url, Map<String, String> fields, byte[] body, callback cb) {
-		final Handler main_handler = new Handler();
+	public static <conn_type extends HttpURLConnection> void request(String method, String url, List<String[]> fields, byte[] body, callback cb) {
 		new Thread(() -> {
 			final conn_type conn;
 			try {
 				conn = (conn_type) new URL(url).openConnection();
 			} catch (Exception e) {
-				main_handler.post(() -> cb.fail(e));
+				new Handler(Looper.getMainLooper()).post(() -> cb.fail(e));
 				return;
 			}
 			final byte[] rsp_body;
 			try {
 				conn.setRequestMethod(method);
 				conn.setDoOutput(body != null && body.length != 0);
-				for (final String field : fields.keySet()) {
-					conn.addRequestProperty(field, fields.get(field));
+				for (final String[] field : fields) {
+					conn.addRequestProperty(field[0], field[1]);
 				}
 				conn.connect();
 				if (conn.getDoOutput()) {
@@ -124,20 +127,20 @@ public class request_helper {
 						os.write(body);
 					} catch (Exception e) {
 						conn.disconnect();
-						main_handler.post(() -> cb.fail(e));
+						new Handler(Looper.getMainLooper()).post(() -> cb.fail(e));
 						return;
 					}
 				}
 				try (final InputStream is = conn.getInputStream()) {
-					rsp_body = stream_helper.read_input_stream(is);
+					rsp_body = StreamHelper.readInputStream(is);
 				} catch (Exception e) {
 					conn.disconnect();
-					main_handler.post(() -> cb.fail(e));
+					new Handler(Looper.getMainLooper()).post(() -> cb.fail(e));
 					return;
 				}
 			} catch (Exception e) {
 				conn.disconnect();
-				main_handler.post(() -> cb.fail(e));
+				new Handler(Looper.getMainLooper()).post(() -> cb.fail(e));
 				return;
 			}
 			conn.disconnect();
@@ -147,10 +150,35 @@ public class request_helper {
 				rsp_code = conn.getResponseCode();
 				rsp_msg = conn.getResponseMessage();
 			} catch (Exception e) {
-				main_handler.post(() -> cb.fail(e));
+				new Handler(Looper.getMainLooper()).post(() -> cb.fail(e));
 				return;
 			}
-			main_handler.post(() -> cb.succ(new result(rsp_code, rsp_msg, conn.getHeaderFields(), rsp_body)));
+			new Handler(Looper.getMainLooper()).post(() -> cb.succ(new result(
+				rsp_code,
+				rsp_msg,
+				conn.getHeaderFields().entrySet().stream().flatMap(entry -> {
+					final String key = entry.getKey();
+					return entry.getValue().stream().map(value -> new String[]{key, value});
+				}).collect(Collectors.toList()),
+				rsp_body
+			)));
 		}).start();
+	}
+	public static CharSequence buildUrl(CharSequence address, CharSequence path, CharSequence... queries) {
+		StringBuilder sb = new StringBuilder(address).append(path);
+		if (queries.length < 2) {
+			return sb;
+		}
+		sb.append('?');
+		sb.append(queries[0]);
+		sb.append('=');
+		sb.append(queries[1]);
+		for (int i = 3; i < queries.length; i += 2) {
+			sb.append('&');
+			sb.append(queries[i - 1]);
+			sb.append('=');
+			sb.append(queries[i]);
+		}
+		return sb;
 	}
 }

@@ -1,3 +1,30 @@
 <resources>
 	<string name="app_name">wuej_0</string>
+	<string name="main_maps">MAPS</string>
+	<string name="main_setting">SETTING</string>
+	<string name="maps_unknown_longitude">Unknown Longitude</string>
+	<string name="maps_unknown_latitude">Unknown Latitude</string>
+	<string name="maps_location_unavailable">Location Unavailable</string>
+	<string name="setting_provider">Location Provider</string>
+	<string name="setting_provider_network">Network</string>
+	<string name="setting_provider_gps">GPS</string>
+	<string name="setting_provider_gps_hardware">GPS Hardware</string>
+	<string name="setting_provider_passive">Passive</string>
+	<string name="setting_provider_fused">Fused</string>
+	<string name="setting_min_time">Minimum Time</string>
+	<string name="setting_min_time_0">Frequent</string>
+	<string name="setting_min_time_1">4096ms</string>
+	<string name="setting_min_time_2">16384ms</string>
+	<string name="setting_min_time_3">65536ms</string>
+	<string name="setting_min_distance">Minimum Distance</string>
+	<string name="setting_min_distance_0">Frequent</string>
+	<string name="setting_min_distance_1">4m</string>
+	<string name="setting_min_distance_2">16m</string>
+	<string name="setting_min_distance_3">64m</string>
+	<string name="setting_server_addr">Server Address</string>
+	<string name="setting_server_addr_default" translatable="false">http://buhzzi.com</string>
+	<string name="setting_download_caching">Download Caching</string>
+	<string name="setting_download_cached">%s of map tiles cached</string>
+	<string name="setting_download_caching_clear">Clear</string>
+	<string name="setting_download_caching_trim">Trim</string>
 </resources>
