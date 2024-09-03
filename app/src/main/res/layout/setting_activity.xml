@@ -74,20 +74,17 @@
 				android:layout_margin="4dp"
 				android:padding="4dp"
 				android:background="@color/design_default_color_secondary"
-				android:text="@string/setting_server_addr"
+				android:text="@string/setting_maps_source"
 				android:textColor="@color/design_default_color_on_secondary"
 				android:fontFamily="@font/xeufont_ascii"
 				android:textSize="32sp"
 			/>
-			<EditText
-				android:id="@+id/serverAddrEditText"
+			<LinearLayout
+				android:id="@+id/mapsSourceLinearLayout"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:orientation="vertical"
 				android:gravity="center"
-				android:text="@string/setting_server_addr_default"
-				android:textSize="16sp"
-				android:inputType="text"
-				android:importantForAutofill="no"
 			/>
 			<TextView
 				android:layout_width="wrap_content"
@@ -158,6 +155,27 @@
 					android:textSize="16sp"
 				/>
 			</LinearLayout>
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_margin="4dp"
+				android:padding="4dp"
+				android:background="@color/design_default_color_secondary"
+				android:text="@string/setting_server_addr"
+				android:textColor="@color/design_default_color_on_secondary"
+				android:fontFamily="@font/xeufont_ascii"
+				android:textSize="32sp"
+			/>
+			<EditText
+				android:id="@+id/serverAddrEditText"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center"
+				android:text="@string/setting_server_addr_default"
+				android:textSize="16sp"
+				android:inputType="text"
+				android:importantForAutofill="no"
+			/>
 		</LinearLayout>
 	</ScrollView>
 </RelativeLayout>

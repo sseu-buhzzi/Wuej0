@@ -21,10 +21,25 @@
 	<string name="setting_min_distance_1">4m</string>
 	<string name="setting_min_distance_2">16m</string>
 	<string name="setting_min_distance_3">64m</string>
-	<string name="setting_server_addr">Server Address</string>
-	<string name="setting_server_addr_default" translatable="false">http://buhzzi.com</string>
+	<string name="setting_maps_source">Maps Source</string>
+	<string name="setting_maps_source_tian_dih_tuq">Tian Dih Tuq</string>
+	<string name="setting_maps_source_giq_linq_i">Giq Linq I</string>
+	<string name="setting_maps_source_suih_ywei_dih_kjou">Suih Ywei Dih Kjou</string>
+	<string name="setting_maps_source_arc_gis">ArcGIS</string>
+	<string name="setting_maps_source_yandex">Yandex</string>
+	<string name="setting_maps_source_bing">Bing</string>
+	<string name="setting_maps_source_auto_navi_style_7">AutoNavi Style 7</string>
+	<string name="setting_maps_source_auto_navi_style_8">AutoNavi Style 8</string>
+	<string name="setting_maps_source_tencent">Tencent</string>
+	<string name="setting_maps_source_tencent_styleid_2">Tencent Style 2</string>
+	<string name="setting_maps_source_tencent_styleid_3">Tencent Style 3</string>
+	<string name="setting_maps_source_tencent_styleid_4">Tencent Style 4</string>
+	<string name="setting_maps_source_tencent_styleid_8">Tencent Style 8</string>
+	<string name="setting_maps_source_tencent_styleid_9">Tencent Style 9</string>
 	<string name="setting_download_caching">Download Caching</string>
 	<string name="setting_download_cached">%s of map tiles cached</string>
 	<string name="setting_download_caching_clear">Clear</string>
 	<string name="setting_download_caching_trim">Trim</string>
+	<string name="setting_server_addr">Server Address</string>
+	<string name="setting_server_addr_default" translatable="false">http://buhzzi.com</string>
 </resources>

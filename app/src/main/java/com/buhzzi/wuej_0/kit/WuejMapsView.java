@@ -16,6 +16,8 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
+import com.buhzzi.wuej_0.SettingActivity;
+
 import java.io.InputStream;
 import java.net.URL;
 
@@ -407,7 +409,7 @@ public class WuejMapsView extends View {
 //			"upgrade-insecure-requests", "1",
 //			"user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0"
 //		);
-		final String source = "tianditu-img_w-" + lyrs;
+		final String source = SettingActivity.Companion.getMapsSource().getSrcName();
 		{
 			final Bitmap bmp = DownloadCaching.Companion.readMapTile(source, x, y, z);
 			if (bmp != null) {
@@ -415,21 +417,9 @@ public class WuejMapsView extends View {
 			}
 		}
 
-		final String url = RequestHelper.buildUrl(
-			"https://t2.tianditu.gov.cn", "/img_w/wmts",
-			"SERVICE", "WMTS",
-			"REQUEST", "GetTile",
-			"VERSION", "1.0.0",
-			"LAYER", "img",
-			"STYLE", "DEFAULT",
-			"TILEMATRIXSET", lyrs,
-			"FORMAT", "tiles",
-			"TILEMATRIX", Integer.toString(z),
-			"TILEROW", Integer.toString(y),
-			"TILECOL", Integer.toString(x),
-			"tk", "e2615b864327530e863275603fee58b3"
-		).toString();
-		final HttpsURLConnection conn = (HttpsURLConnection) new URL(url).openConnection();
+		final HttpsURLConnection conn = (HttpsURLConnection) new URL(
+			SettingActivity.Companion.getMapsSource().getTileUrlStr(x, y, z)
+		).openConnection();
 		try {
 			conn.addRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0");
 			conn.connect();

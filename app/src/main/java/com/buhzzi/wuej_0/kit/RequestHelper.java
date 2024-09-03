@@ -164,21 +164,4 @@ public class RequestHelper {
 			)));
 		}).start();
 	}
-	public static CharSequence buildUrl(CharSequence address, CharSequence path, CharSequence... queries) {
-		StringBuilder sb = new StringBuilder(address).append(path);
-		if (queries.length < 2) {
-			return sb;
-		}
-		sb.append('?');
-		sb.append(queries[0]);
-		sb.append('=');
-		sb.append(queries[1]);
-		for (int i = 3; i < queries.length; i += 2) {
-			sb.append('&');
-			sb.append(queries[i - 1]);
-			sb.append('=');
-			sb.append(queries[i]);
-		}
-		return sb;
-	}
 }

@@ -19,6 +19,7 @@ import com.buhzzi.wuej_0.kit.DownloadCaching
 import com.buhzzi.wuej_0.kit.FontConstants
 import com.buhzzi.wuej_0.kit.MetricsRelative
 import com.buhzzi.wuej_0.kit.StackedActivity
+import com.buhzzi.wuej_0.kit.WuejMapsSource
 
 class SettingActivity : StackedActivity() {
 	companion object {
@@ -46,9 +47,26 @@ class SettingActivity : StackedActivity() {
 			16F to topActivity.getString(R.string.setting_min_distance_2),
 			64F to topActivity.getString(R.string.setting_min_distance_3)
 		)
-		var serverAddr = topActivity.getString(R.string.setting_server_addr_default)
-			private set
+		var mapsSource: WuejMapsSource = WuejMapsSource.srcAutoNaviStyle_8
+		val mapsSourceNames = mapOf(
+			WuejMapsSource.srcTianDihTuq to topActivity.getString(R.string.setting_maps_source_tian_dih_tuq),
+			WuejMapsSource.srcGiqLinqI to topActivity.getString(R.string.setting_maps_source_giq_linq_i),
+			WuejMapsSource.srcSuihYweiDihKjou to topActivity.getString(R.string.setting_maps_source_suih_ywei_dih_kjou),
+			WuejMapsSource.srcArcGIS to topActivity.getString(R.string.setting_maps_source_arc_gis),
+			WuejMapsSource.srcYandex to topActivity.getString(R.string.setting_maps_source_yandex),
+			WuejMapsSource.srcBing to topActivity.getString(R.string.setting_maps_source_bing),
+			WuejMapsSource.srcAutoNaviStyle_7 to topActivity.getString(R.string.setting_maps_source_auto_navi_style_7),
+			WuejMapsSource.srcAutoNaviStyle_8 to topActivity.getString(R.string.setting_maps_source_auto_navi_style_8),
+			WuejMapsSource.srcTencent to topActivity.getString(R.string.setting_maps_source_tencent),
+			WuejMapsSource.srcTencentStyleid_2 to topActivity.getString(R.string.setting_maps_source_tencent_styleid_2),
+			WuejMapsSource.srcTencentStyleid_3 to topActivity.getString(R.string.setting_maps_source_tencent_styleid_3),
+			WuejMapsSource.srcTencentStyleid_4 to topActivity.getString(R.string.setting_maps_source_tencent_styleid_4),
+			WuejMapsSource.srcTencentStyleid_8 to topActivity.getString(R.string.setting_maps_source_tencent_styleid_8),
+			WuejMapsSource.srcTencentStyleid_9 to topActivity.getString(R.string.setting_maps_source_tencent_styleid_9)
+		)
 		var downloadCaching = 0x10000000 // 256 MiB
+			private set
+		var serverAddr = topActivity.getString(R.string.setting_server_addr_default)
 			private set
 	}
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,8 +77,9 @@ class SettingActivity : StackedActivity() {
 		initProvider()
 		initMinTime()
 		initMinDistance()
-		initServerAddr()
+		initMapsSource()
 		initDownloadCaching()
+		initServerAddr()
 	}
 	private fun <ItemT> shadeButtons(shadedButtons: Map<ItemT, View>, selected: ItemT) = shadedButtons.forEach { (item, view) ->
 		view.setBackgroundColor(getColor(if (item == selected)
@@ -141,10 +160,29 @@ class SettingActivity : StackedActivity() {
 		}}
 		shadeButtons(shadedButtons, minDistance)
 	}
-	private fun initServerAddr() {
-		findViewById<EditText>(R.id.serverAddrEditText).addTextChangedListener { text ->
-			serverAddr = text.toString()
-		}
+	private fun initMapsSource() {
+		val mapsSourceLay = findViewById<LinearLayout>(R.id.mapsSourceLinearLayout)
+		val px4dp = MetricsRelative.dpToPx(4F)
+		lateinit var shadedButtons: Map<WuejMapsSource, View>
+		shadedButtons = mapsSourceNames.mapValues { (someMapsSource, someName) -> TextView(this).apply {
+			layoutParams = LinearLayout.LayoutParams(
+				ViewGroup.LayoutParams.WRAP_CONTENT, 0, 1F
+			).apply {
+				setMargins(px4dp)
+			}
+			setPadding(px4dp)
+			gravity = Gravity.CENTER
+			text = someName
+			setTextColor(getColor(com.google.android.material.R.color.design_default_color_on_primary))
+			typeface = FontConstants.xeuTf
+			textSize = 16F
+			setOnClickListener {
+				mapsSource = someMapsSource
+				shadeButtons(shadedButtons, someMapsSource)
+			}
+			mapsSourceLay.addView(this)
+		} }
+		shadeButtons(shadedButtons, mapsSource)
 	}
 	private fun initDownloadCaching() {
 		val downloadCachingTxt = findViewById<TextView>(R.id.downloadCachingTextView)
@@ -168,5 +206,10 @@ class SettingActivity : StackedActivity() {
 		}
 		downloadCachingSeekBar.progress = downloadCaching
 		downloadCachingTxt.text = Formatter.formatFileSize(this, downloadCaching.toLong())
+	}
+	private fun initServerAddr() {
+		findViewById<EditText>(R.id.serverAddrEditText).addTextChangedListener { text ->
+			serverAddr = text.toString()
+		}
 	}
 }

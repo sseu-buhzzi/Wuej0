@@ -8,6 +8,23 @@ class SocketRequestHelper {
 	companion object {
 		fun buildHttpMessage(method: String, path: String, fields: List<Array<String>>)
 			= "$method $path HTTP/1.1\r\n${fields.joinToString { pair -> "${pair[0]}: ${pair[1]}\r\n" }}\r\n"
+		fun buildUrl(address: String, path: String, vararg queries: String) = StringBuilder(address)
+			.append(path)
+			.run {
+				if (queries.size >= 2) {
+					append('?')
+					append(queries[0])
+					append('=')
+					append(queries[1])
+					(2 .. queries.size - 2 step 2).forEach {
+						append('&')
+						append(queries[it])
+						append('=')
+						append(queries[it + 1])
+					}
+				}
+				this
+			}
 		fun request(method: String, url: String, fields: List<Array<String>>, body: ByteArray, cb: RequestHelper.callback) {
 			Thread {
 				val urlUrl = URL(url)
