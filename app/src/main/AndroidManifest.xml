@@ -14,9 +14,9 @@
 		android:allowBackup="true"
 		android:dataExtractionRules="@xml/data_extraction_rules"
 		android:fullBackupContent="@xml/backup_rules"
-		android:icon="@mipmap/sseu_icon"
+		android:icon="@mipmap/wuej"
 		android:label="@string/app_name"
-		android:roundIcon="@mipmap/sseu_icon"
+		android:roundIcon="@mipmap/wuej"
 		android:supportsRtl="true"
 		android:theme="@style/Theme.Wuej_0"
 		tools:targetApi="31"
@@ -33,5 +33,4 @@
 		<activity android:name=".WuejMapsActivity"/>
 		<activity android:name=".SettingActivity"/>
 	</application>
-
 </manifest>
