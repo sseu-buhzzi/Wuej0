@@ -23,14 +23,15 @@ class OrientationRelative {
 					Sensor.TYPE_MAGNETIC_FIELD -> geomagneticArr = event.values
 				}
 				if (gravityArr != null && geomagneticArr != null) {
-					val rotation_mat = FloatArray(9)
-					val inclination_mat = FloatArray(9)
-					if (SensorManager.getRotationMatrix(rotation_mat, inclination_mat, gravityArr, geomagneticArr)) {
-						SensorManager.getOrientation(rotation_mat, orientation)
+					val rotationMat = FloatArray(9)
+					val inclinationMat = FloatArray(9)
+					if (SensorManager.getRotationMatrix(rotationMat, inclinationMat, gravityArr, geomagneticArr)) {
+						SensorManager.getOrientation(rotationMat, orientation)
 					}
 				}
 			}
-			override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) { }
+
+			override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
 		}
 		private val sensorManager
@@ -46,6 +47,7 @@ class OrientationRelative {
 				sm.registerListener(listener, it, SensorManager.SENSOR_DELAY_UI)
 			}
 		}
+
 		fun stopUpdatingOrientation() {
 			sensorManager.unregisterListener(listener)
 		}

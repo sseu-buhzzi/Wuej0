@@ -11,16 +11,20 @@ class DownloadCaching {
 	companion object {
 		private val downloadCachingDir
 			get() = File(StackedActivity.topActivity.filesDir, "download_caching")
+
 		private fun concatXyz(x: Int, y: Int, z: Int) = arrayOf(x, y, z).joinToString(".") { it.toString(16).padStart(8) }
+
 		init {
 			downloadCachingDir.mkdir()
 		}
+
 		fun calcCachedSize() = downloadCachingDir.listFiles { item -> item.isDirectory }
 			?.asSequence()
 			?.flatMap { it.listFiles { item -> item.isFile }?.asSequence() ?: emptySequence() }
 			?.map { it.length() }
 			?.sum()
 			?: 0L
+
 		fun writeMapTile(source: String, x: Int, y: Int, z: Int, bmp: Bitmap) = File(downloadCachingDir, source).runCatching {
 			exists() || mkdir()
 			File(this, concatXyz(x, y, z)).outputStream().use {
@@ -31,6 +35,7 @@ class DownloadCaching {
 		}.onFailure {
 			it.printStackTrace()
 		}.isSuccess
+
 		fun readMapTile(source: String, x: Int, y: Int, z: Int) = File(downloadCachingDir, source).takeIf {
 			it.exists()
 		}?.run {
@@ -42,14 +47,17 @@ class DownloadCaching {
 				BitmapFactory.decodeStream(it)
 			}
 		}
+
 		fun listFilesByAccessTime() = downloadCachingDir.listFiles { item -> item.isDirectory }
 			?.asSequence()
 			?.flatMap { it.listFiles { item -> item.isFile }?.asSequence() ?: emptySequence() }
 			?.sortedBy { Files.readAttributes(it.toPath(), BasicFileAttributes::class.java).lastAccessTime().toMillis() }
 			?: emptySequence()
+
 		fun clearMapTiles() = downloadCachingDir.listFiles()?.run {
 			all(File::deleteRecursively)
 		} ?: false
+
 		fun trimMapTiles() {
 			val exceedSize = calcCachedSize() - SettingActivity.downloadCaching
 			if (exceedSize > 0) {

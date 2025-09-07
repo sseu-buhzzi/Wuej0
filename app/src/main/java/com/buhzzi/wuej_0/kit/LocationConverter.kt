@@ -1,5 +1,6 @@
 package com.buhzzi.wuej_0.kit
 
+import android.annotation.SuppressLint
 import kotlin.math.abs
 
 class LocationConverter {
@@ -13,37 +14,39 @@ class LocationConverter {
 			val s = rest.toInt()
 			return "$d°$m'$s\""
 		}
+
 		fun longitudeToDms(longi: Double): String {
-			return positiveCoordinateToDms(abs(longi)) + if (longi > 0)
-				'E'
-			else if (longi < 0)
-				'W'
-			else
-				""
+			return positiveCoordinateToDms(abs(longi)) + when {
+				longi > 0 -> 'E'
+				longi < 0 -> 'W'
+				else -> ""
+			}
 		}
+
 		fun latitudeToDms(lati: Double): String {
-			return positiveCoordinateToDms(abs(lati)) + if (lati > 0)
-				'N'
-			else if (lati < 0)
-				'S'
-			else
-				""
+			return positiveCoordinateToDms(abs(lati)) + when {
+				lati > 0 -> 'N'
+				lati < 0 -> 'S'
+				else -> ""
+			}
 		}
+
+		@SuppressLint("DefaultLocale")
 		fun longitudeToFrac(longi: Double): String {
-			return String.format("%.6f°", abs(longi)) + if (longi > 0)
-				'E'
-			else if (longi < 0)
-				'W'
-			else
-				""
+			return String.format("%.6f°", abs(longi)) + when {
+				longi > 0 -> 'E'
+				longi < 0 -> 'W'
+				else -> ""
+			}
 		}
+
+		@SuppressLint("DefaultLocale")
 		fun latitudeToFrac(lati: Double): String {
-			return String.format("%.6f°", abs(lati)) + if (lati > 0)
-				'N'
-			else if (lati < 0)
-				'S'
-			else
-				""
+			return String.format("%.6f°", abs(lati)) + when {
+				lati > 0 -> 'N'
+				lati < 0 -> 'S'
+				else -> ""
+			}
 		}
 	}
 }

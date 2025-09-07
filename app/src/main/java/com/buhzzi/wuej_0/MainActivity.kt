@@ -17,10 +17,12 @@ class MainActivity : StackedActivity() {
 		bindActivityEntryWithViewId(R.id.settingButton, SettingActivity::class.java)
 		bindActivityEntryWithViewId(R.id.updateButton, UpdateActivity::class.java)
 	}
+
 	private fun <ActivityT : Activity> bindActivityEntryWithViewId(id: Int, cls: Class<ActivityT>) = findViewById<View>(id).setOnClickListener {
 		startActivity(Intent(this, cls))
 	}
+
 	private fun ignoreBatteryOptimization() = startActivity(
-		Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+		Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
 	)
 }

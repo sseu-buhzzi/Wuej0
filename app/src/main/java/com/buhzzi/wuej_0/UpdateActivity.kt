@@ -1,7 +1,6 @@
 package com.buhzzi.wuej_0
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -9,6 +8,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -25,6 +25,7 @@ class UpdateActivity : AppCompatActivity() {
 		initDownload()
 		initInstall()
 	}
+
 	private fun initDownload() {
 		downloadPickerLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("*/*")) { uri ->
 			Thread {
@@ -59,7 +60,7 @@ class UpdateActivity : AppCompatActivity() {
 		downloadButton.setOnClickListener {
 			downloadAddr = findViewById<EditText>(R.id.downloadAddrEditText).text.toString()
 			try {
-				val downloadName = Uri.parse(downloadAddr).lastPathSegment ?: throw Exception("Invalid download address")
+				val downloadName = downloadAddr.toUri().lastPathSegment ?: throw Exception("Invalid download address")
 				downloadPickerLauncher.launch(downloadName)
 				downloadButton.isEnabled = false
 			} catch (e: Exception) {
@@ -67,6 +68,7 @@ class UpdateActivity : AppCompatActivity() {
 			}
 		}
 	}
+
 	private fun initInstall() {
 		installPickerLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
 			try {

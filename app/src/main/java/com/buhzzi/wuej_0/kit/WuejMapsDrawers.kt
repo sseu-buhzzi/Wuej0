@@ -5,17 +5,13 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.view.View
-import com.buhzzi.wuej_0.kit.ColorRelative
-import com.buhzzi.wuej_0.kit.MetricsRelative
+import androidx.core.graphics.createBitmap
 
 class WuejMapsDrawers {
 	companion object {
 		fun drawCntlCc(cntlVisibility: Int): Bitmap {
 			val size = MetricsRelative.displayMetrics.widthPixels ushr 3
-			val bmp = Bitmap.createBitmap(
-				size, size,
-				Bitmap.Config.ARGB_8888
-			)
+			val bmp = createBitmap(size, size)
 			val cntlFolded = cntlVisibility != View.VISIBLE
 			val cv = Canvas(bmp)
 			cv.drawColor(if (cntlFolded) 0x40808080 else -0x3f7f7f80)
@@ -28,12 +24,10 @@ class WuejMapsDrawers {
 			cv.drawCircle((size ushr 1).toFloat(), (size ushr 1).toFloat(), (size * 3 ushr 3).toFloat(), paint)
 			return bmp
 		}
+
 		fun drawCntlArrow(): Bitmap {
 			val size = MetricsRelative.displayMetrics.widthPixels ushr 3
-			val bmp = Bitmap.createBitmap(
-				size, size,
-				Bitmap.Config.ARGB_8888
-			)
+			val bmp = createBitmap(size, size)
 			val cv = Canvas(bmp)
 			cv.drawColor(-0x7f7f7f80)
 			val path = Path()
@@ -48,12 +42,10 @@ class WuejMapsDrawers {
 			cv.drawPath(path, paint)
 			return bmp
 		}
+
 		fun drawCntlRota(): Bitmap {
 			val size = MetricsRelative.displayMetrics.widthPixels ushr 3
-			val bmp = Bitmap.createBitmap(
-				size, size,
-				Bitmap.Config.ARGB_8888
-			)
+			val bmp = createBitmap(size, size)
 			val cv = Canvas(bmp)
 			cv.drawColor(0x40808080)
 			val path = Path()
@@ -70,10 +62,7 @@ class WuejMapsDrawers {
 
 		fun drawCntlZoomIn(): Bitmap {
 			val size = MetricsRelative.displayMetrics.widthPixels ushr 3
-			val bmp = Bitmap.createBitmap(
-				size, size,
-				Bitmap.Config.ARGB_8888
-			)
+			val bmp = createBitmap(size, size)
 			val cv = Canvas(bmp)
 			cv.drawColor(0x40808080)
 			val path = Path()
@@ -92,10 +81,7 @@ class WuejMapsDrawers {
 
 		fun drawCntlZoomOut(): Bitmap {
 			val size = MetricsRelative.displayMetrics.widthPixels ushr 3
-			val bmp = Bitmap.createBitmap(
-				size, size,
-				Bitmap.Config.ARGB_8888
-			)
+			val bmp = createBitmap(size, size)
 			val cv = Canvas(bmp)
 			cv.drawColor(0x40808080)
 			val path = Path()
@@ -113,10 +99,7 @@ class WuejMapsDrawers {
 		fun drawCentralCursor(): Bitmap {
 			val size = MetricsRelative.displayMetrics.widthPixels ushr 4
 			val unit = (size ushr 3).toFloat()
-			val bmp = Bitmap.createBitmap(
-				size, size,
-				Bitmap.Config.ARGB_8888
-			)
+			val bmp = createBitmap(size, size)
 			val cv = Canvas(bmp)
 			cv.drawColor(0x00000000)
 			val path = Path()

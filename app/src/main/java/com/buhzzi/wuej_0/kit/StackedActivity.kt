@@ -9,11 +9,13 @@ abstract class StackedActivity : AppCompatActivity() {
 		val topActivity
 			get() = activityStack[activityStack.size - 1]
 	}
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
 		activityStack.add(this)
 	}
+
 	override fun onDestroy() {
 		super.onDestroy()
 

@@ -29,7 +29,7 @@ class SettingActivity : StackedActivity() {
 			LocationManager.NETWORK_PROVIDER to topActivity.getString(R.string.setting_provider_network),
 			LocationManager.GPS_PROVIDER to topActivity.getString(R.string.setting_provider_gps),
 			LocationManager.PASSIVE_PROVIDER to topActivity.getString(R.string.setting_provider_passive),
-			LocationManager.FUSED_PROVIDER to topActivity.getString(R.string.setting_provider_fused)
+			LocationManager.FUSED_PROVIDER to topActivity.getString(R.string.setting_provider_fused),
 		)
 		var minTime = 4096L
 			private set
@@ -37,7 +37,7 @@ class SettingActivity : StackedActivity() {
 			0L to topActivity.getString(R.string.setting_min_time_0),
 			4096L to topActivity.getString(R.string.setting_min_time_1),
 			16384L to topActivity.getString(R.string.setting_min_time_2),
-			65536L to topActivity.getString(R.string.setting_min_time_3)
+			65536L to topActivity.getString(R.string.setting_min_time_3),
 		)
 		var minDistance = 4F
 			private set
@@ -45,7 +45,7 @@ class SettingActivity : StackedActivity() {
 			0F to topActivity.getString(R.string.setting_min_distance_0),
 			4F to topActivity.getString(R.string.setting_min_distance_1),
 			16F to topActivity.getString(R.string.setting_min_distance_2),
-			64F to topActivity.getString(R.string.setting_min_distance_3)
+			64F to topActivity.getString(R.string.setting_min_distance_3),
 		)
 		var mapsSource: WuejMapsSource = WuejMapsSource.srcAutoNaviStyle8
 		val mapsSourceNames = mapOf(
@@ -62,14 +62,15 @@ class SettingActivity : StackedActivity() {
 			WuejMapsSource.srcTencentStyleid3 to topActivity.getString(R.string.setting_maps_source_tencent_styleid_3),
 			WuejMapsSource.srcTencentStyleid4 to topActivity.getString(R.string.setting_maps_source_tencent_styleid_4),
 			WuejMapsSource.srcTencentStyleid8 to topActivity.getString(R.string.setting_maps_source_tencent_styleid_8),
-			WuejMapsSource.srcTencentStyleid9 to topActivity.getString(R.string.setting_maps_source_tencent_styleid_9)
+			WuejMapsSource.srcTencentStyleid9 to topActivity.getString(R.string.setting_maps_source_tencent_styleid_9),
 		)
 		var downloadCaching = 0x10000000 // 256 MiB
 			private set
 		var serverAddr = topActivity.getString(R.string.setting_server_addr_default)
-//		var serverAddr = "http://192.168.36.43"
+			//		var serverAddr = "http://192.168.36.43"
 			private set
 	}
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
@@ -82,109 +83,127 @@ class SettingActivity : StackedActivity() {
 		initDownloadCaching()
 		initServerAddr()
 	}
+
 	private fun <ItemT> shadeButtons(shadedButtons: Map<ItemT, View>, selected: ItemT) = shadedButtons.forEach { (item, view) ->
-		view.setBackgroundColor(getColor(if (item == selected)
-			com.google.android.material.R.color.design_default_color_primary
-		else
-			com.google.android.material.R.color.design_default_color_primary_variant
-		))
+		view.setBackgroundColor(
+			getColor(
+				if (item == selected) {
+					com.google.android.material.R.color.design_default_color_primary
+				} else {
+					com.google.android.material.R.color.design_default_color_primary_variant
+				},
+			),
+		)
 	}
+
 	private fun initProvider() {
 		val priorityLay = findViewById<LinearLayout>(R.id.providerLinearLayout)
 		val px4dp = MetricsRelative.dpToPx(4F)
 		lateinit var shadedButtons: Map<String, View>
-		shadedButtons = providerNames.mapValues { (someProvider, someName) -> TextView(this).apply {
-			layoutParams = LinearLayout.LayoutParams(
-				0, ViewGroup.LayoutParams.WRAP_CONTENT, 1F
-			).apply {
-				setMargins(px4dp)
+		shadedButtons = providerNames.mapValues { (someProvider, someName) ->
+			TextView(this).apply {
+				layoutParams = LinearLayout.LayoutParams(
+					0, ViewGroup.LayoutParams.WRAP_CONTENT, 1F,
+				).apply {
+					setMargins(px4dp)
+				}
+				setPadding(px4dp)
+				gravity = Gravity.CENTER
+				text = someName
+				setTextColor(getColor(com.google.android.material.R.color.design_default_color_on_primary))
+				typeface = FontConstants.xeuTf
+				textSize = 16F
+				setOnClickListener {
+					provider = someProvider
+					shadeButtons(shadedButtons, someProvider)
+				}
+				priorityLay.addView(this)
 			}
-			setPadding(px4dp)
-			gravity = Gravity.CENTER
-			text = someName
-			setTextColor(getColor(com.google.android.material.R.color.design_default_color_on_primary))
-			typeface = FontConstants.xeuTf
-			textSize = 16F
-			setOnClickListener {
-				provider = someProvider
-				shadeButtons(shadedButtons, someProvider)
-			}
-			priorityLay.addView(this)
-		} }
+		}
 		shadeButtons(shadedButtons, provider)
 	}
+
 	private fun initMinTime() {
 		val minTimeLay = findViewById<LinearLayout>(R.id.minTimeLinearLayout)
 		val px4dp = MetricsRelative.dpToPx(4F)
 		lateinit var shadedButtons: Map<Long, View>
-		shadedButtons = minTimeNames.mapValues { (someMinTime, someName) -> TextView(this).apply {
-			layoutParams = LinearLayout.LayoutParams(
-				0, ViewGroup.LayoutParams.WRAP_CONTENT, 1F
-			).apply {
-				setMargins(px4dp)
+		shadedButtons = minTimeNames.mapValues { (someMinTime, someName) ->
+			TextView(this).apply {
+				layoutParams = LinearLayout.LayoutParams(
+					0, ViewGroup.LayoutParams.WRAP_CONTENT, 1F,
+				).apply {
+					setMargins(px4dp)
+				}
+				setPadding(px4dp)
+				gravity = Gravity.CENTER
+				text = someName
+				setTextColor(getColor(com.google.android.material.R.color.design_default_color_on_primary))
+				typeface = FontConstants.xeuTf
+				textSize = 16F
+				setOnClickListener {
+					minTime = someMinTime
+					shadeButtons(shadedButtons, someMinTime)
+				}
+				minTimeLay.addView(this)
 			}
-			setPadding(px4dp)
-			gravity = Gravity.CENTER
-			text = someName
-			setTextColor(getColor(com.google.android.material.R.color.design_default_color_on_primary))
-			typeface = FontConstants.xeuTf
-			textSize = 16F
-			setOnClickListener {
-				minTime = someMinTime
-				shadeButtons(shadedButtons, someMinTime)
-			}
-			minTimeLay.addView(this)
-		} }
+		}
 		shadeButtons(shadedButtons, minTime)
 	}
+
 	private fun initMinDistance() {
 		val minDistanceLay = findViewById<LinearLayout>(R.id.minDistanceLinearLayout)
 		val px4dp = MetricsRelative.dpToPx(4F)
 		lateinit var shadedButtons: Map<Float, View>
-		shadedButtons = minDistanceNames.mapValues { (someMinDistance, someName) -> TextView(this).apply {
-			layoutParams = LinearLayout.LayoutParams(
-				0, ViewGroup.LayoutParams.WRAP_CONTENT, 1F
-			).apply {
-				setMargins(px4dp)
+		shadedButtons = minDistanceNames.mapValues { (someMinDistance, someName) ->
+			TextView(this).apply {
+				layoutParams = LinearLayout.LayoutParams(
+					0, ViewGroup.LayoutParams.WRAP_CONTENT, 1F,
+				).apply {
+					setMargins(px4dp)
+				}
+				setPadding(px4dp)
+				gravity = Gravity.CENTER
+				text = someName
+				setTextColor(getColor(com.google.android.material.R.color.design_default_color_on_primary))
+				typeface = FontConstants.xeuTf
+				textSize = 16F
+				setOnClickListener {
+					minDistance = someMinDistance
+					shadeButtons(shadedButtons, someMinDistance)
+				}
+				minDistanceLay.addView(this)
 			}
-			setPadding(px4dp)
-			gravity = Gravity.CENTER
-			text = someName
-			setTextColor(getColor(com.google.android.material.R.color.design_default_color_on_primary))
-			typeface = FontConstants.xeuTf
-			textSize = 16F
-			setOnClickListener {
-				minDistance = someMinDistance
-				shadeButtons(shadedButtons, someMinDistance)
-			}
-			minDistanceLay.addView(this)
-		}}
+		}
 		shadeButtons(shadedButtons, minDistance)
 	}
+
 	private fun initMapsSource() {
 		val mapsSourceLay = findViewById<LinearLayout>(R.id.mapsSourceLinearLayout)
 		val px4dp = MetricsRelative.dpToPx(4F)
 		lateinit var shadedButtons: Map<WuejMapsSource, View>
-		shadedButtons = mapsSourceNames.mapValues { (someMapsSource, someName) -> TextView(this).apply {
-			layoutParams = LinearLayout.LayoutParams(
-				ViewGroup.LayoutParams.WRAP_CONTENT, 0, 1F
-			).apply {
-				setMargins(px4dp)
+		shadedButtons = mapsSourceNames.mapValues { (someMapsSource, someName) ->
+			TextView(this).apply {
+				layoutParams = LinearLayout.LayoutParams(
+					ViewGroup.LayoutParams.WRAP_CONTENT, 0, 1F,
+				).apply {
+					setMargins(px4dp)
+				}
+				setPadding(px4dp)
+				gravity = Gravity.CENTER
+				text = someName
+				setTextColor(getColor(com.google.android.material.R.color.design_default_color_on_primary))
+				typeface = FontConstants.xeuTf
+				textSize = 16F
+				setOnClickListener {
+					mapsSource = someMapsSource
+					shadeButtons(shadedButtons, someMapsSource)
+				}
+				mapsSourceLay.addView(this)
 			}
-			setPadding(px4dp)
-			gravity = Gravity.CENTER
-			text = someName
-			setTextColor(getColor(com.google.android.material.R.color.design_default_color_on_primary))
-			typeface = FontConstants.xeuTf
-			textSize = 16F
-			setOnClickListener {
-				mapsSource = someMapsSource
-				shadeButtons(shadedButtons, someMapsSource)
-			}
-			mapsSourceLay.addView(this)
-		} }
+		}
 		shadeButtons(shadedButtons, mapsSource)
 	}
+
 	private fun initDownloadCaching() {
 		val downloadCachingTxt = findViewById<TextView>(R.id.downloadCachingTextView)
 		val downloadCachingSeekBar = findViewById<SeekBar>(R.id.downloadCachingSeekBar)
@@ -193,10 +212,12 @@ class SettingActivity : StackedActivity() {
 				downloadCaching = progress
 				downloadCachingTxt.text = Formatter.formatFileSize(this@SettingActivity, progress.toLong())
 			}
-			override fun onStartTrackingTouch(seekBar: SeekBar?) { }
-			override fun onStopTrackingTouch(seekBar: SeekBar?) { }
+
+			override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+			override fun onStopTrackingTouch(seekBar: SeekBar?) {}
 		})
-		findViewById<TextView>(R.id.downloadCachedTextView).text = getString(R.string.setting_download_cached, Formatter.formatFileSize(this, DownloadCaching.calcCachedSize()))
+		findViewById<TextView>(R.id.downloadCachedTextView).text =
+			getString(R.string.setting_download_cached, Formatter.formatFileSize(this, DownloadCaching.calcCachedSize()))
 		findViewById<Button>(R.id.clearDownloadCachingButton).setOnClickListener {
 			DownloadCaching.clearMapTiles()
 			recreate()
@@ -208,6 +229,7 @@ class SettingActivity : StackedActivity() {
 		downloadCachingSeekBar.progress = downloadCaching
 		downloadCachingTxt.text = Formatter.formatFileSize(this, downloadCaching.toLong())
 	}
+
 	private fun initServerAddr() {
 		findViewById<EditText>(R.id.serverAddrEditText).addTextChangedListener { text ->
 			serverAddr = text.toString()

@@ -51,7 +51,7 @@ class WuejMapsActivity : StackedActivity() {
 	private lateinit var longiTxt: TextView
 	private lateinit var latiTxt: TextView
 	private val locatingHandler = Handler(Looper.getMainLooper())
-	private lateinit var locatingLambda: () -> Unit
+	private lateinit var locatingRunnable: Runnable
 
 	private lateinit var xuh: String
 	private lateinit var lorif: ByteArray
@@ -68,8 +68,8 @@ class WuejMapsActivity : StackedActivity() {
 		initInfo()
 
 		// You should turn off background battery saver to continuously call this lambda.
-		locatingLambda = {
-			locatingHandler.postDelayed(locatingLambda, 512)
+		locatingRunnable = Runnable {
+			locatingHandler.postDelayed(locatingRunnable, 512)
 			LocationRelative.location?.let {
 				if (firstTime) {
 					firstTime = false
@@ -86,7 +86,7 @@ class WuejMapsActivity : StackedActivity() {
 			}
 			centralCursorImg.rotation = OrientationRelative.azimuth
 		}
-		locatingHandler.post(locatingLambda)
+		locatingHandler.post(locatingRunnable)
 
 		LocationRelative.startUpdatingLocation()
 		OrientationRelative.startUpdatingOrientation()
@@ -95,7 +95,7 @@ class WuejMapsActivity : StackedActivity() {
 	override fun onDestroy() {
 		super.onDestroy()
 
-		locatingHandler.removeCallbacks(locatingLambda)
+		locatingHandler.removeCallbacks(locatingRunnable)
 
 		LocationRelative.stopUpdatingLocation()
 		OrientationRelative.stopUpdatingOrientation()
@@ -132,7 +132,8 @@ class WuejMapsActivity : StackedActivity() {
 		}
 	}
 
-	@SuppressLint("ClickableViewAccessibility") private fun initCntlViews() {
+	@SuppressLint("ClickableViewAccessibility")
+	private fun initCntlViews() {
 		cntlCcImg = findViewById(R.id.cntlCcImageView)
 		cntlCcImg.setImageBitmap(WuejMapsDrawers.drawCntlCc(cntlVisibility))
 		cntlCcImg.setOnClickListener {
@@ -197,18 +198,20 @@ class WuejMapsActivity : StackedActivity() {
 			getString(R.string.maps_unknown_latitude),
 			SettingActivity.providerNames[SettingActivity.provider],
 			SettingActivity.minTimeNames[SettingActivity.minTime],
-			SettingActivity.minDistanceNames[SettingActivity.minDistance]
-		).map { name -> TextView(this).apply {
-			layoutParams = LinearLayout.LayoutParams(
-				ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
-			)
-			setBackgroundColor(0x80000000.toInt())
-			text = name
-			typeface = FontConstants.xeuTf
-			setTextColor(0xffffffff.toInt())
-			textSize = 16F
-			infoLay.addView(this)
-		}}
+			SettingActivity.minDistanceNames[SettingActivity.minDistance],
+		).map { name ->
+			TextView(this).apply {
+				layoutParams = LinearLayout.LayoutParams(
+					ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+				)
+				setBackgroundColor(0x80000000.toInt())
+				text = name
+				typeface = FontConstants.xeuTf
+				setTextColor(0xffffffff.toInt())
+				textSize = 16F
+				infoLay.addView(this)
+			}
+		}
 		longiTxt = infoTxtList[0]
 		latiTxt = infoTxtList[1]
 	}
@@ -228,60 +231,74 @@ class WuejMapsActivity : StackedActivity() {
 
 	private fun setAndGetLocations(location: Location) = (arrayOf(
 		WuejMapsView.longitudeInOne(location.longitude).toUInt(),
-		WuejMapsView.latitudeInOne(location.latitude).toUInt()
+		WuejMapsView.latitudeInOne(location.latitude).toUInt(),
 	) + OrientationRelative.orientation.map { f -> f.toRawBits().toUInt() })
 		.joinToString(",")
 		.toByteArray()
 		.run { RsaRelative.encrypt(locup, this) }
-		.run { Base64.getEncoder().encodeToString(this)
-			.apply { print(this) }
+		.run {
+			Base64.getEncoder().encodeToString(this)
+				.apply { print(this) }
 		}
-		.run { mapOf(
-			"task" to "location_240830_set_and_get",
-			"name" to chaschig.first { p -> p[1] == xuh }[0],
-			"loca" to this,
-		) }
+		.run {
+			mapOf(
+				"task" to "location_240830_set_and_get",
+				"name" to chaschig.first { p -> p[1] == xuh }[0],
+				"loca" to this,
+			)
+		}
 		.run { JSONObject(this) }
 		.toString()
 		.toByteArray()
-		.run { RsaRelative.encrypt(resources.openRawResource(R.raw._240828)
-			.run { StreamHelper.readInputStream(this) }
-		, this) }
-		.run { (ServerRelative.magic
-			+ ByteRelative.intToBytes(this.size + 16)
-			+ ServerRelative.jsonMagic
-			+ this
-		) }
-		.run { SocketRequestHelper.request(
-			String(ServerRelative.getTshr16()),
-			SettingActivity.serverAddr + "/",
-			emptyList(),
-			this,
-			(RequestHelper.json_callback { code, _, body -> runOnUiThread {
-				code == 200 || return@runOnUiThread
-				mapsView.contactNames = body.keys().asSequence().map { k ->
-					chaschig.first { m -> m[0] == k }[1]
-				}.toList().toTypedArray()
-				mapsView.contactLocaArr = body.keys().asSequence().map { chasch ->
-					val (xInOne, yInOne) = body.getString(chasch)
-						.run { Base64.getDecoder().decode(this) }
-						.run { RsaRelative.decrypt(lorif, this) }
-						.decodeToString()
-						.split(',')
-					((xInOne.toULong() shl 32) or yInOne.toULong()).toLong()
-				}.toList().toTypedArray().toLongArray()
-			} }).toCallback()
-		) }
+		.run {
+			RsaRelative.encrypt(
+				resources.openRawResource(R.raw._240828)
+					.run { StreamHelper.readInputStream(this) }, this,
+			)
+		}
+		.run {
+			ServerRelative.magic +
+				ByteRelative.intToBytes(this.size + 16) +
+				ServerRelative.jsonMagic +
+				this
+		}
+		.run {
+			SocketRequestHelper.request(
+				String(ServerRelative.getTshr16()),
+				SettingActivity.serverAddr + "/",
+				emptyList(),
+				this,
+				(RequestHelper.json_callback { code, _, body ->
+					runOnUiThread {
+						code == 200 || return@runOnUiThread
+						mapsView.contactNames = body.keys().asSequence().map { k ->
+							chaschig.first { m -> m[0] == k }[1]
+						}.toList().toTypedArray()
+						mapsView.contactLocaArr = body.keys().asSequence().map { chasch ->
+							val (xInOne, yInOne) = body.getString(chasch)
+								.run { Base64.getDecoder().decode(this) }
+								.run { RsaRelative.decrypt(lorif, this) }
+								.decodeToString()
+								.split(',')
+							((xInOne.toULong() shl 32) or yInOne.toULong()).toLong()
+						}.toList().toTypedArray().toLongArray()
+					}
+				}).toCallback(),
+			)
+		}
 
 	private fun ensureLocatingPermission(): Boolean {
-		if (ActivityCompat.checkSelfPermission(
-			this, Manifest.permission.ACCESS_FINE_LOCATION
-		) == PackageManager.PERMISSION_GRANTED) {
+		if (
+			ActivityCompat.checkSelfPermission(
+				this, Manifest.permission.ACCESS_FINE_LOCATION,
+			) == PackageManager.PERMISSION_GRANTED
+		) {
 			return true
 		}
 		ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 0x24022116)
 		return false
 	}
+
 	private fun locateMyself() = LocationRelative.location?.let {
 		mapsView.setCameraLocation(it)
 		mapsView.pixInOne = max(mapsView.pixInOne, 0x200000.toDouble())

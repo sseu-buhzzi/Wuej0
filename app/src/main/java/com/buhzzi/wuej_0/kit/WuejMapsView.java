@@ -39,15 +39,19 @@ public class WuejMapsView extends View {
 			this.y = y;
 			this.z = z;
 		}
+
 		public boolean hit(final CharSequence lyrs, final int x, final int y, final int z) {
 			return this.x == x && this.y == y && this.z == z && this.lyrs.equals(lyrs);
 		}
 	}
+
 	public static class BitmapWithBounds {
 		Bitmap bmp = null;
 		Rect bounds = new Rect();
 	}
+
 	public static Bitmap noDataBmp = Bitmap.createBitmap(128, 128, Bitmap.Config.ARGB_8888);
+
 	static {
 		final Canvas no_data_cv = new Canvas(noDataBmp);
 		no_data_cv.drawColor(ColorRelative.Companion.getColorBack());
@@ -63,8 +67,10 @@ public class WuejMapsView extends View {
 		paint.setColor(0xffff0000);
 		no_data_cv.drawRect(0, 0, noDataBmp.getWidth(), noDataBmp.getHeight(), paint);
 	}
+
 	public static Paint contactStrokePaint = new Paint();
 	public static Paint contactFillPaint = new Paint();
+
 	static {
 		contactStrokePaint.setColor(0xffff0000);
 		contactStrokePaint.setStyle(Paint.Style.STROKE);
@@ -78,6 +84,7 @@ public class WuejMapsView extends View {
 		contactFillPaint.setTextSize(64);
 		contactFillPaint.setTypeface(FontConstants.Companion.getXeuTf());
 	}
+
 	private int mapsViewWidth;
 	private int mapsViewHeight;
 	public static int MAP_CACHE_SET_NUMB = 256;
@@ -99,20 +106,25 @@ public class WuejMapsView extends View {
 	private float lastTouchedY = 0F;
 	private boolean multiPointerLock = false; // Lock the slide action when stop zooming (though only one pointer was in the screen).
 	private final ScaleGestureDetector scaleGestureDetector = new ScaleGestureDetector(StackedActivity.Companion.getTopActivity(), new ScaleGestureDetector.OnScaleGestureListener() {
-		@Override public boolean onScale(@NonNull ScaleGestureDetector detector) {
+		@Override
+		public boolean onScale(@NonNull ScaleGestureDetector detector) {
 			dPixInOne = (int) (Math.log(detector.getScaleFactor()) * 128);
 			return true;
 		}
-		@Override public boolean onScaleBegin(@NonNull ScaleGestureDetector detector) {
+
+		@Override
+		public boolean onScaleBegin(@NonNull ScaleGestureDetector detector) {
 			return true;
 		}
-		@Override public void onScaleEnd(@NonNull ScaleGestureDetector detector) {
+
+		@Override
+		public void onScaleEnd(@NonNull ScaleGestureDetector detector) {
 			dPixInOne /= 2;
 		}
 	});
 	public String[] contactNames;
 	public long[] contactLocaArr;
-//    public java.util.concurrent.Semaphore semaphore = new java.util.concurrent.Semaphore(16);
+	//    public java.util.concurrent.Semaphore semaphore = new java.util.concurrent.Semaphore(16);
 	public boolean[] fetchingList = new boolean[FETCHING_LIST_LENGTH];
 	public Handler motionHandler = new Handler(Looper.getMainLooper());
 	public Runnable motionRunnable = () -> {
@@ -130,6 +142,7 @@ public class WuejMapsView extends View {
 			this.loadInScreenMaps();
 		}
 	};
+
 	public WuejMapsView(Context ctx, AttributeSet attrs) {
 		super(ctx, attrs);
 
@@ -142,39 +155,50 @@ public class WuejMapsView extends View {
 		this.contactNames = new String[0];
 		this.contactLocaArr = new long[0];
 	}
+
 	public static int getMapCacheSet(final int x, final int y) {
 		return x & 0x0f | y << 4 & 0xf0;
 	}
+
 	public static long coordInOne(final android.location.Location location) {
 		return longitudeInOne(location.getLongitude()) << 32 | latitudeInOne(location.getLatitude());
 	}
+
 	// 2^{31}\left(\frac\lambda{180}\right)
 	public static long longitudeInOne(final double longi) {
 		return (long) (longi * 11930464.711111112) + 0x0000000080000000L;
 	}
+
 	// 2^{31}\left(1-\frac1\pi \ln\left(tan\left(\frac{\pi\phi}{360}+\frac\pi4\right)\right)\right)
 	public static long latitudeInOne(final double lati) {
 		return (long) (Math.log(Math.tan(lati * 0.008726646259971648 + 0.7853981633974483)) * -683565275.5764316) + 0x0000000080000000L;
 	}
-	@Override public void onAttachedToWindow() {
+
+	@Override
+	public void onAttachedToWindow() {
 		super.onAttachedToWindow();
 
 		this.motionHandler.post(this.motionRunnable);
 	}
-	@Override public void onDetachedFromWindow() {
+
+	@Override
+	public void onDetachedFromWindow() {
 		super.onDetachedFromWindow();
 
 		this.motionHandler.removeCallbacks(this.motionRunnable);
 	}
 
-	@Override public void onSizeChanged(int w, int h, int oldw, int oldh) {
+	@Override
+	public void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
 
 		mapsViewWidth = w;
 		mapsViewHeight = h;
 	}
 
-	@SuppressLint("ClickableViewAccessibility")	@Override public boolean onTouchEvent(MotionEvent event) {
+	@SuppressLint("ClickableViewAccessibility")
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
 		scaleGestureDetector.onTouchEvent(event);
 		final float x = event.getX();
 		final float y = event.getY();
@@ -184,28 +208,29 @@ public class WuejMapsView extends View {
 		}
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
-			lastTouchedX = x;
-			lastTouchedY = y;
-			break;
-			case MotionEvent.ACTION_UP:
-			dXInOne /= 2;
-			dYInOne /= 2;
-			multiPointerLock = false;
-			break;
-			case MotionEvent.ACTION_MOVE:
-			if (multiPointerLock |= event.getPointerCount() > 1) {
-				dXInOne = dYInOne = 0;
-			} else {
-				dXInOne = (int) ((lastTouchedX - x) * 0.5F);
-				dYInOne = (int) ((lastTouchedY - y) * 0.5F);
 				lastTouchedX = x;
 				lastTouchedY = y;
-			}
+				break;
+			case MotionEvent.ACTION_UP:
+				dXInOne /= 2;
+				dYInOne /= 2;
+				multiPointerLock = false;
+				break;
+			case MotionEvent.ACTION_MOVE:
+				if (multiPointerLock |= event.getPointerCount() > 1) {
+					dXInOne = dYInOne = 0;
+				} else {
+					dXInOne = (int) ((lastTouchedX - x) * 0.5F);
+					dYInOne = (int) ((lastTouchedY - y) * 0.5F);
+					lastTouchedX = x;
+					lastTouchedY = y;
+				}
 		}
 		return true;
 	}
 
-	@Override public void onDraw(@androidx.annotation.NonNull final Canvas cv) {
+	@Override
+	public void onDraw(@androidx.annotation.NonNull final Canvas cv) {
 		super.onDraw(cv);
 
 		final float rotation = this.rotation * 57.29578F;
@@ -233,11 +258,13 @@ public class WuejMapsView extends View {
 		}
 		cv.restore();
 	}
+
 	public void setCameraLocation(@NonNull final android.location.Location location) {
 		this.xInOne = longitudeInOne(location.getLongitude());
 		this.yInOne = latitudeInOne(location.getLatitude());
 		this.loadInScreenMaps();
 	}
+
 	// Rotate and load
 	public void loadInScreenMaps() {
 		final long onePx = (long) pixInOne;
@@ -317,28 +344,30 @@ public class WuejMapsView extends View {
 			}
 			switch (ward = ward & 3) {
 				case 0:
-				++xOff;
-				ward += xOff + yOff == 1 ? 1 : 0;
-				continue;
+					++xOff;
+					ward += xOff + yOff == 1 ? 1 : 0;
+					continue;
 				case 1:
-				++yOff;
-				ward += xOff == yOff ? 1 : 0;
-				continue;
+					++yOff;
+					ward += xOff == yOff ? 1 : 0;
+					continue;
 				case 2:
-				--xOff;
-				ward += xOff + yOff == 0 ? 1 : 0;
-				continue;
+					--xOff;
+					ward += xOff + yOff == 0 ? 1 : 0;
+					continue;
 				case 3:
-				--yOff;
-				ward += xOff == yOff ? 1 : 0;
+					--yOff;
+					ward += xOff == yOff ? 1 : 0;
 			}
 		}
 		this.invalidate();
 	}
+
 	private Bitmap transitToFetchMapButWhoKnowsWhatsFrom240827(CharSequence lyrs, int x, int x_off, int y, int y_off, int z) {
 		// (1 << z) - 1 is the mask of no excess bits in current zoom level.
 		return fetchMap(lyrs, x + x_off & (1 << z) - 1, y + y_off & (1 << z) - 1, z);
 	}
+
 	public Bitmap fetchMap(final CharSequence lyrs, final int x, final int y, final int z) {
 		final int mapCacheSetNdx = getMapCacheSet(x, y);
 		final int mapCacheEntNdx;
@@ -388,6 +417,7 @@ public class WuejMapsView extends View {
 		}).start();
 		return null;
 	}
+
 	public static Bitmap requestTile(CharSequence lyrs, int x, int y, int z) throws Exception {
 //		@SuppressLint("DefaultLocale") final String url = String.format(
 ////			"https://t2.tianditu.gov.cn/vec_w/wmts?tk=e2615b864327530e863275603fee58b3&SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=%s&FORMAT=tiles&TILECOL=%d&TILEROW=%d&TILEMATRIX=%d",

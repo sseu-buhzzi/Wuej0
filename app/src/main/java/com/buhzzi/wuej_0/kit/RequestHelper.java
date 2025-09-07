@@ -19,6 +19,7 @@ public class RequestHelper {
 		public String msg;
 		public List<String[]> fields;
 		public byte[] body;
+
 		public result(int code, String msg, List<String[]> fields, byte[] body) {
 			this.code = code;
 			this.msg = msg;
@@ -26,15 +27,20 @@ public class RequestHelper {
 			this.body = body;
 		}
 	}
+
 	public interface callback {
 		void succ(result rspRes);
+
 		void fail(Exception e);
 	}
+
 	public interface json_callback {
 		void response(int code, String msg, JSONObject data);
+
 		default callback toCallback() {
 			return new callback() {
-				@Override public void succ(result rspRes) {
+				@Override
+				public void succ(result rspRes) {
 					final JSONObject bodyObj;
 					try {
 						bodyObj = new JSONObject(new String(rspRes.body));
@@ -66,13 +72,16 @@ public class RequestHelper {
 					}
 					response(body_code, body_msg, data);
 				}
-				@Override public void fail(Exception e) {
+
+				@Override
+				public void fail(Exception e) {
 					e.printStackTrace();
 					response(-1, null, null);
 				}
 			};
 		}
 	}
+
 	public static <ConnType extends HttpURLConnection> result requestSync(String method, String url, List<String[]> fields, byte[] body) throws Exception {
 		final byte[] rsp_body;
 		final ConnType conn = (ConnType) new URL(url).openConnection();
@@ -105,6 +114,7 @@ public class RequestHelper {
 			rsp_body
 		);
 	}
+
 	public static <conn_type extends HttpURLConnection> void request(String method, String url, List<String[]> fields, byte[] body, callback cb) {
 		new Thread(() -> {
 			final conn_type conn;

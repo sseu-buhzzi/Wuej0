@@ -16,11 +16,13 @@ public class StreamHelper {
 				break;
 			}
 			block[off++] = (byte) b;
-			if (off == block_size) {{
-				blocks.add(block);
-				block = new byte[block_size];
-				off = 0;
-			}}
+			if (off == block_size) {
+				{
+					blocks.add(block);
+					block = new byte[block_size];
+					off = 0;
+				}
+			}
 		}
 		final long length = (long) blocks.size() * block_size + off;
 		if (length > Integer.MAX_VALUE) {

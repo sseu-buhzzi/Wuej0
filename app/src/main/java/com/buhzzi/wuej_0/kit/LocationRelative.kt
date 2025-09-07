@@ -16,9 +16,12 @@ class LocationRelative private constructor() {
 		}
 		private val locationManager
 			get() = StackedActivity.topActivity.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-		@SuppressLint("MissingPermission") fun startUpdatingLocation() {
+
+		@SuppressLint("MissingPermission")
+		fun startUpdatingLocation() {
 			locationManager.requestLocationUpdates(SettingActivity.provider, SettingActivity.minTime, SettingActivity.minDistance, listener)
 		}
+
 		fun stopUpdatingLocation() {
 			locationManager.removeUpdates(listener)
 		}
