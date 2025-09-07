@@ -302,7 +302,7 @@ class WuejMapsActivity : StackedActivity() {
 				SettingActivity.serverAddr + "/",
 				emptyList(),
 				this,
-				(RequestHelper.json_callback { code, _, body ->
+				(RequestHelper.JsonCallback { code, _, body ->
 					runOnUiThread {
 						code == 200 || return@runOnUiThread
 						mapsView.contactNames = body.keys().asSequence().map { k ->
