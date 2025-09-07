@@ -1,4 +1,4 @@
-package com.buhzzi.wuej_0.kit;
+package com.buhzzi.wuej_0.kit
 
 import android.graphics.Typeface
 import androidx.core.content.res.ResourcesCompat

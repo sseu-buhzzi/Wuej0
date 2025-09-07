@@ -29,8 +29,10 @@ import com.buhzzi.wuej_0.kit.StreamHelper
 import com.buhzzi.wuej_0.kit.WuejMapsDrawers
 import com.buhzzi.wuej_0.kit.WuejMapsView
 import org.json.JSONObject
-import java.io.File
 import java.util.Base64
+import kotlin.io.path.div
+import kotlin.io.path.exists
+import kotlin.io.path.readBytes
 import kotlin.math.max
 
 class WuejMapsActivity : StackedActivity() {
@@ -51,7 +53,7 @@ class WuejMapsActivity : StackedActivity() {
 	private lateinit var longiTxt: TextView
 	private lateinit var latiTxt: TextView
 	private val locatingHandler = Handler(Looper.getMainLooper())
-	private lateinit var locatingLambda: () -> Unit
+	private lateinit var locatingRunnable: Runnable
 
 	private lateinit var xuh: String
 	private lateinit var lorif: ByteArray
@@ -61,6 +63,36 @@ class WuejMapsActivity : StackedActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
+		if (ensureLocatingPermission()) {
+			initWithLocatingPermission()
+		}
+	}
+
+	override fun onDestroy() {
+		super.onDestroy()
+
+		if (::locatingRunnable.isInitialized) {
+			locatingHandler.removeCallbacks(locatingRunnable)
+		}
+
+		LocationRelative.stopUpdatingLocation()
+		OrientationRelative.stopUpdatingOrientation()
+	}
+
+	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String?>, grantResults: IntArray) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+		if (requestCode == REQUEST_LOCATING_PERMISSION_CODE) {
+			if (
+				grantResults.isNotEmpty() &&
+				grantResults[0] == PackageManager.PERMISSION_GRANTED
+			) {
+				initWithLocatingPermission()
+			}
+		}
+	}
+
+	private fun initWithLocatingPermission() {
 		setContentView(R.layout.wuej_maps_activity)
 		initMapsView()
 		initXuh()
@@ -68,37 +100,30 @@ class WuejMapsActivity : StackedActivity() {
 		initInfo()
 
 		// You should turn off background battery saver to continuously call this lambda.
-		locatingLambda = {
-			locatingHandler.postDelayed(locatingLambda, 512)
+		locatingRunnable = Runnable {
+			locatingHandler.postDelayed(locatingRunnable, 512)
 			LocationRelative.location?.let {
 				if (firstTime) {
 					firstTime = false
 					locateMyself()
 				}
-				mapsView.load_in_screen_maps()
+				mapsView.loadInScreenMaps()
 				longiTxt.text = LocationConverter.longitudeToFrac(it.longitude)
 				latiTxt.text = LocationConverter.latitudeToFrac(it.latitude)
 
-				setAndGetLocations(it)
+				if (::lorif.isInitialized && ::locup.isInitialized) {
+					setAndGetLocations(it)
+				}
 			} ?: run {
 				longiTxt.text = getString(R.string.maps_unknown_longitude)
 				latiTxt.text = getString(R.string.maps_unknown_latitude)
 			}
 			centralCursorImg.rotation = OrientationRelative.azimuth
 		}
-		locatingHandler.post(locatingLambda)
+		locatingHandler.post(locatingRunnable)
 
 		LocationRelative.startUpdatingLocation()
 		OrientationRelative.startUpdatingOrientation()
-	}
-
-	override fun onDestroy() {
-		super.onDestroy()
-
-		locatingHandler.removeCallbacks(locatingLambda)
-
-		LocationRelative.stopUpdatingLocation()
-		OrientationRelative.stopUpdatingOrientation()
 	}
 
 	private fun initMapsView() {
@@ -132,11 +157,12 @@ class WuejMapsActivity : StackedActivity() {
 		}
 	}
 
-	@SuppressLint("ClickableViewAccessibility") private fun initCntlViews() {
+	@SuppressLint("ClickableViewAccessibility")
+	private fun initCntlViews() {
 		cntlCcImg = findViewById(R.id.cntlCcImageView)
 		cntlCcImg.setImageBitmap(WuejMapsDrawers.drawCntlCc(cntlVisibility))
 		cntlCcImg.setOnClickListener {
-			mapsView.load_in_screen_maps()
+			mapsView.loadInScreenMaps()
 			cntlVisibility = if (cntlVisibility == View.VISIBLE) View.INVISIBLE else View.VISIBLE
 			cntlCcImg.setImageBitmap(WuejMapsDrawers.drawCntlCc(cntlVisibility))
 			cntlArrowRightImg.visibility = cntlVisibility
@@ -197,95 +223,128 @@ class WuejMapsActivity : StackedActivity() {
 			getString(R.string.maps_unknown_latitude),
 			SettingActivity.providerNames[SettingActivity.provider],
 			SettingActivity.minTimeNames[SettingActivity.minTime],
-			SettingActivity.minDistanceNames[SettingActivity.minDistance]
-		).map { name -> TextView(this).apply {
-			layoutParams = LinearLayout.LayoutParams(
-				ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
-			)
-			setBackgroundColor(0x80000000.toInt())
-			text = name
-			typeface = FontConstants.xeuTf
-			setTextColor(0xffffffff.toInt())
-			textSize = 16F
-			infoLay.addView(this)
-		}}
+			SettingActivity.minDistanceNames[SettingActivity.minDistance],
+		).map { name ->
+			TextView(this).apply {
+				layoutParams = LinearLayout.LayoutParams(
+					ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+				)
+				setBackgroundColor(0x80000000.toInt())
+				text = name
+				typeface = FontConstants.xeuTf
+				setTextColor(0xffffffff.toInt())
+				textSize = 16F
+				infoLay.addView(this)
+			}
+		}
 		longiTxt = infoTxtList[0]
 		latiTxt = infoTxtList[1]
 	}
 
 	private fun initXuh() {
-		File(filesDir, "wuej_xuh").readBytes().run {
-			val nmLn = (this[0].toUInt() or (this[1].toUInt() shl 8)).toInt()
-			xuh = decodeToString(2, nmLn + 2)
-			val otLn = this[nmLn + 2].toUByte().toInt() + 1024
-			lorif = copyOfRange(nmLn + 3, otLn + nmLn + 3)
-			locup = copyOfRange(otLn + nmLn + 3, size)
-		}
-		chaschig = File(filesDir, "chaschig").readBytes().run { // hashes
+		(filesDir.toPath() / "wuej_xuh")
+			.takeIf { it.exists() }
+			?.readBytes()
+			?.run {
+				val nmLn = (this[0].toUInt() or (this[1].toUInt() shl 8)).toInt()
+				xuh = decodeToString(2, nmLn + 2)
+				val otLn = this[nmLn + 2].toUByte().toInt() + 1024
+				lorif = copyOfRange(nmLn + 3, otLn + nmLn + 3)
+				locup = copyOfRange(otLn + nmLn + 3, size)
+			}
+		chaschig = run {
+			(filesDir.toPath() / "chaschig")
+				.takeIf { it.exists() }
+				?.readBytes()
+				?: "{}".encodeToByteArray()
+		}.run { // hashes
 			JSONObject(decodeToString())
 		}.run { keys().asSequence().map { k -> arrayOf(k, getString(k)) }.toList().toTypedArray() }
 	}
 
-	fun setAndGetLocations(location: Location) = (arrayOf(
-		WuejMapsView.longitude_in_one(location.longitude).toUInt(),
-		WuejMapsView.latitude_in_one(location.latitude).toUInt()
+	private fun setAndGetLocations(location: Location) = (arrayOf(
+		WuejMapsView.longitudeInOne(location.longitude).toUInt(),
+		WuejMapsView.latitudeInOne(location.latitude).toUInt(),
 	) + OrientationRelative.orientation.map { f -> f.toRawBits().toUInt() })
 		.joinToString(",")
 		.toByteArray()
 		.run { RsaRelative.encrypt(locup, this) }
-		.run { Base64.getEncoder().encodeToString(this)
-			.apply { print(this) }
+		.run {
+			Base64.getEncoder().encodeToString(this)
+				.apply { print(this) }
 		}
-		.run { mapOf(
-			"task" to "location_240830_set_and_get",
-			"name" to chaschig.first { p -> p[1] == xuh }[0],
-			"loca" to this
-		) }
+		.run {
+			mapOf(
+				"task" to "location_240830_set_and_get",
+				"name" to chaschig.first { p -> p[1] == xuh }[0],
+				"loca" to this,
+			)
+		}
 		.run { JSONObject(this) }
 		.toString()
 		.toByteArray()
-		.run { RsaRelative.encrypt(resources.openRawResource(R.raw._240828)
-			.run { StreamHelper.readInputStream(this) }
-		, this) }
-		.run { (ServerRelative.magic
-			+ ByteRelative.intToBytes(this.size + 16)
-			+ ServerRelative.jsonMagic
-			+ this
-		) }
-		.run { SocketRequestHelper.request(
-			String(ServerRelative.getTshr16()),
-			SettingActivity.serverAddr + "/",
-			emptyList(),
-			this,
-			(RequestHelper.json_callback { code, _, body -> runOnUiThread {
-				code == 200 || return@runOnUiThread
-				mapsView.contactNames = body.keys().asSequence().map { k ->
-					chaschig.first { m -> m[0] == k }[1]
-				}.toList().toTypedArray()
-				mapsView.contactLocaArr = body.keys().asSequence().map { chasch ->
-					val (xInOne, yInOne) = body.getString(chasch)
-						.run { Base64.getDecoder().decode(this) }
-						.run { RsaRelative.decrypt(lorif, this) }
-						.decodeToString()
-						.split(',')
-					((xInOne.toULong() shl 32) or yInOne.toULong()).toLong()
-				}.toList().toTypedArray().toLongArray()
-			} }).toCallback()
-		) }
+		.run {
+			RsaRelative.encrypt(
+				resources.openRawResource(R.raw._240828)
+					.run { StreamHelper.readInputStream(this) },
+				this,
+			)
+		}
+		.run {
+			ServerRelative.magic +
+				ByteRelative.intToBytes(this.size + 16) +
+				ServerRelative.jsonMagic +
+				this
+		}
+		.run {
+			SocketRequestHelper.request(
+				String(ServerRelative.getTshr16()),
+				SettingActivity.serverAddr + "/",
+				emptyList(),
+				this,
+				(RequestHelper.json_callback { code, _, body ->
+					runOnUiThread {
+						code == 200 || return@runOnUiThread
+						mapsView.contactNames = body.keys().asSequence().map { k ->
+							chaschig.first { m -> m[0] == k }[1]
+						}.toList().toTypedArray()
+						mapsView.contactLocaArr = body.keys().asSequence().map { chasch ->
+							val (xInOne, yInOne) = body.getString(chasch)
+								.run { Base64.getDecoder().decode(this) }
+								.run { RsaRelative.decrypt(lorif, this) }
+								.decodeToString()
+								.split(',')
+							((xInOne.toULong() shl 32) or yInOne.toULong()).toLong()
+						}.toList().toTypedArray().toLongArray()
+					}
+				}).toCallback(),
+			)
+		}
 
 	private fun ensureLocatingPermission(): Boolean {
-		if (ActivityCompat.checkSelfPermission(
-			this, Manifest.permission.ACCESS_FINE_LOCATION
-		) == PackageManager.PERMISSION_GRANTED) {
+		if (
+			ActivityCompat.checkSelfPermission(
+				this, Manifest.permission.ACCESS_FINE_LOCATION,
+			) == PackageManager.PERMISSION_GRANTED
+		) {
 			return true
 		}
-		ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 0x24022116)
+		ActivityCompat.requestPermissions(
+			this,
+			arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+			REQUEST_LOCATING_PERMISSION_CODE,
+		)
 		return false
 	}
+
 	private fun locateMyself() = LocationRelative.location?.let {
-		mapsView.set_camera_location(it)
-		mapsView.pixInOne = max(mapsView.pixInOne, 0x200000.toDouble())
+		mapsView.setCameraLocation(it)
+		mapsView.pixInOne = max(mapsView.pixInOne, 0x20000.toDouble())
 	} ?: run {
 		Toast.makeText(this, R.string.maps_location_unavailable, Toast.LENGTH_SHORT).show()
+	}
+
+	companion object {
+		private const val REQUEST_LOCATING_PERMISSION_CODE = 0x24022116
 	}
 }

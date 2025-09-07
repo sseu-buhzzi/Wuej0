@@ -15,4 +15,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "wuej_0"
 include(":app")
- 
