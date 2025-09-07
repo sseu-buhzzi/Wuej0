@@ -2,6 +2,7 @@
 	<string name="app_name">wuej_0</string>
 	<string name="main_maps">MAPS</string>
 	<string name="main_setting">SETTING</string>
+	<string name="main_update">UPDATE</string>
 	<string name="maps_unknown_longitude">Unknown Longitude</string>
 	<string name="maps_unknown_latitude">Unknown Latitude</string>
 	<string name="maps_location_unavailable">Location Unavailable</string>
@@ -42,4 +43,10 @@
 	<string name="setting_download_caching_trim">Trim</string>
 	<string name="setting_server_addr">Server Address</string>
 	<string name="setting_server_addr_default" translatable="false">http://buhzzi.com</string>
+	<string name="update_download_info">Here you can download files from input address and save it on some certain path.</string>
+	<string name="update_download_title">Downloading with \"Wuej_0\"</string>
+	<string name="update_input_address">Input an Address Here</string>
+	<string name="update_download">Choose a Path and Download to There</string>
+	<string name="update_install_info">Here you can install or update an application from APK file on some certain path.</string>
+	<string name="update_install">Choose a Path and Install from There</string>
 </resources>

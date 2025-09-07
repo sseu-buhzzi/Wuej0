@@ -10,7 +10,10 @@ class LocationRelative private constructor() {
 	companion object {
 		var location: Location? = null
 			private set
-		private val listener = { location: Location -> this.location = location }
+		private val listener = { updatedLocation: Location ->
+//			The left top point on the map is (180W, 85.05112878N).
+			location = updatedLocation
+		}
 		private val locationManager
 			get() = StackedActivity.topActivity.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 		@SuppressLint("MissingPermission") fun startUpdatingLocation() {

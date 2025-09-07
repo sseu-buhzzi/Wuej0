@@ -2,6 +2,10 @@ package com.buhzzi.wuej_0.kit
 
 abstract class WuejMapsSource private constructor(val srcName: String) {
 	companion object {
+		abstract class SrcWithOffset24100312096(srcName: String) : WuejMapsSource(srcName) {
+			override val offsetXInOne = 0xe400
+			override val offsetYInOne = 0x9400
+		}
 		// 天地圖
 		val srcTianDihTuq = object : WuejMapsSource("tianditu-img_w-w") {
 			override fun getTileUrlStr(x: Int, y: Int, z: Int) = takeIf { z < 19 }
@@ -29,7 +33,7 @@ abstract class WuejMapsSource private constructor(val srcName: String) {
 				).toString() }
 		}
 		// 四維地球
-		val srcSuihYweiDihKjou = object : WuejMapsSource("siweiearth-satellite") {
+		val srcSuihYweiDihKjou = object : SrcWithOffset24100312096("siweiearth-satellite") {
 			override fun getTileUrlStr(x: Int, y: Int, z: Int) = takeIf { z < 19 }
 				?.run { SocketRequestHelper.buildUrl(
 					"https://aoweiservice.siweiearth.com", "/map/new/satellite/$z/$y/$x"
@@ -41,7 +45,9 @@ abstract class WuejMapsSource private constructor(val srcName: String) {
 					"https://server.arcgisonline.com", "/ArcGIS/rest/services/World_Imagery/MapServer/tile/$z/$y/$x"
 				).toString() }
 		}
+		// Has strange offset.
 		val srcYandex = object : WuejMapsSource("yandex-sat") {
+			override val offsetYInOne = 0x1d0000
 			override fun getTileUrlStr(x: Int, y: Int, z: Int) = takeIf { z < 18 }
 				?.run { SocketRequestHelper.buildUrl(
 					"https://core-sat.maps.yandex.net", "/tiles",
@@ -59,7 +65,7 @@ abstract class WuejMapsSource private constructor(val srcName: String) {
 				).toString() }
 		}
 		// 高德
-		val srcAutoNaviStyle_7 = object : WuejMapsSource("autonavi-style_7") {
+		val srcAutoNaviStyle7 = object : SrcWithOffset24100312096("autonavi-style_7") {
 			override fun getTileUrlStr(x: Int, y: Int, z: Int) = takeIf { z < 19 }
 				?.run { SocketRequestHelper.buildUrl(
 					"https://webrd0${ (Math.random() * 4).toInt() }.is.autonavi.com", "/appmaptile",
@@ -72,7 +78,7 @@ abstract class WuejMapsSource private constructor(val srcName: String) {
 				).toString() }
 		}
 		// 高德
-		val srcAutoNaviStyle_8 = object : WuejMapsSource("autonavi-style_8") {
+		val srcAutoNaviStyle8 = object : SrcWithOffset24100312096("autonavi-style_8") {
 			override fun getTileUrlStr(x: Int, y: Int, z: Int) = takeIf { z < 19 }
 				?.run { SocketRequestHelper.buildUrl(
 					"https://webrd0${ (Math.random() * 4).toInt() }.is.autonavi.com", "/appmaptile",
@@ -85,66 +91,66 @@ abstract class WuejMapsSource private constructor(val srcName: String) {
 				).toString() }
 		}
 		// 騰訊
-		val srcTencent = object : WuejMapsSource("tencent-gtimg-realtimerender") {
+		val srcTencent = object : SrcWithOffset24100312096("tencent-gtimg-realtimerender") {
 			override fun getTileUrlStr(x: Int, y: Int, z: Int) = takeIf { z < 19 }
 				?.run { SocketRequestHelper.buildUrl(
 					"https://rt${ (Math.random() * 4).toInt() }.map.gtimg.com", "/realtimerender",
 					"z", z.toString(),
 					"x", x.toString(),
-					"y", y.toString(),
+					"y", (1.shl(z) - (y + 1)).toString(),
 					"type", "vector"
 				).toString() }
 		}
 		// 騰訊
-		val srcTencentStyleid_2 = object : WuejMapsSource("tencent-gtimg-realtimerender") {
+		val srcTencentStyleid2 = object : SrcWithOffset24100312096("tencent-gtimg-realtimerender-styleid_2") {
 			override fun getTileUrlStr(x: Int, y: Int, z: Int) = takeIf { z < 19 }
 				?.run { SocketRequestHelper.buildUrl(
 					"https://rt${ (Math.random() * 4).toInt() }.map.gtimg.com", "/realtimerender",
 					"z", z.toString(),
 					"x", x.toString(),
-					"y", y.toString(),
+					"y", (1.shl(z) - (y + 1)).toString(),
 					"type", "vector",
 					"styleid", "2"
 				).toString() }
 		}
 		// 騰訊
-		val srcTencentStyleid_3 = object : WuejMapsSource("tencent-gtimg-realtimerender") {
+		val srcTencentStyleid3 = object : SrcWithOffset24100312096("tencent-gtimg-realtimerender-styleid_3") {
 			override fun getTileUrlStr(x: Int, y: Int, z: Int) = takeIf { z < 19 }
 				?.run { SocketRequestHelper.buildUrl(
 					"https://rt${ (Math.random() * 4).toInt() }.map.gtimg.com", "/realtimerender",
 					"z", z.toString(),
 					"x", x.toString(),
-					"y", y.toString(),
+					"y", (1.shl(z) - (y + 1)).toString(),
 					"type", "vector",
 					"styleid", "3"
 				).toString() }
 		}
 		// 騰訊
-		val srcTencentStyleid_4 = object : WuejMapsSource("tencent-gtimg-realtimerender") {
+		val srcTencentStyleid4 = object : SrcWithOffset24100312096("tencent-gtimg-realtimerender-styleid_4") {
 			override fun getTileUrlStr(x: Int, y: Int, z: Int) = takeIf { z < 19 }
 				?.run { SocketRequestHelper.buildUrl(
 					"https://rt${ (Math.random() * 4).toInt() }.map.gtimg.com", "/realtimerender",
 					"z", z.toString(),
 					"x", x.toString(),
-					"y", y.toString(),
+					"y", (1.shl(z) - (y + 1)).toString(),
 					"type", "vector",
 					"styleid", "4"
 				).toString() }
 		}
 		// 騰訊
-		val srcTencentStyleid_8 = object : WuejMapsSource("tencent-gtimg-realtimerender") {
+		val srcTencentStyleid8 = object : SrcWithOffset24100312096("tencent-gtimg-realtimerender-styleid_8") {
 			override fun getTileUrlStr(x: Int, y: Int, z: Int) = takeIf { z < 19 }
 				?.run { SocketRequestHelper.buildUrl(
 					"https://rt${ (Math.random() * 4).toInt() }.map.gtimg.com", "/realtimerender",
 					"z", z.toString(),
 					"x", x.toString(),
-					"y", y.toString(),
+					"y", (1.shl(z) - (y + 1)).toString(),
 					"type", "vector",
 					"styleid", "8"
 				).toString() }
 		}
 		// 騰訊
-		val srcTencentStyleid_9 = object : WuejMapsSource("tencent-gtimg-realtimerender") {
+		val srcTencentStyleid9 = object : SrcWithOffset24100312096("tencent-gtimg-realtimerender-styleid_9") {
 			override fun getTileUrlStr(x: Int, y: Int, z: Int) = takeIf { z < 19 }
 				?.run { SocketRequestHelper.buildUrl(
 					"https://rt${ (Math.random() * 4).toInt() }.map.gtimg.com", "/realtimerender",
@@ -161,5 +167,7 @@ abstract class WuejMapsSource private constructor(val srcName: String) {
 				digitToChar()
 		}.joinToString("")
 	}
+	open val offsetXInOne = 0
+	open val offsetYInOne = 0
 	abstract fun getTileUrlStr(x: Int, y: Int, z: Int): String?
 }

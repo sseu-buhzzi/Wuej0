@@ -75,7 +75,7 @@ class WuejMapsActivity : StackedActivity() {
 					firstTime = false
 					locateMyself()
 				}
-				mapsView.load_in_screen_maps()
+				mapsView.loadInScreenMaps()
 				longiTxt.text = LocationConverter.longitudeToFrac(it.longitude)
 				latiTxt.text = LocationConverter.latitudeToFrac(it.latitude)
 
@@ -136,7 +136,7 @@ class WuejMapsActivity : StackedActivity() {
 		cntlCcImg = findViewById(R.id.cntlCcImageView)
 		cntlCcImg.setImageBitmap(WuejMapsDrawers.drawCntlCc(cntlVisibility))
 		cntlCcImg.setOnClickListener {
-			mapsView.load_in_screen_maps()
+			mapsView.loadInScreenMaps()
 			cntlVisibility = if (cntlVisibility == View.VISIBLE) View.INVISIBLE else View.VISIBLE
 			cntlCcImg.setImageBitmap(WuejMapsDrawers.drawCntlCc(cntlVisibility))
 			cntlArrowRightImg.visibility = cntlVisibility
@@ -226,9 +226,9 @@ class WuejMapsActivity : StackedActivity() {
 		}.run { keys().asSequence().map { k -> arrayOf(k, getString(k)) }.toList().toTypedArray() }
 	}
 
-	fun setAndGetLocations(location: Location) = (arrayOf(
-		WuejMapsView.longitude_in_one(location.longitude).toUInt(),
-		WuejMapsView.latitude_in_one(location.latitude).toUInt()
+	private fun setAndGetLocations(location: Location) = (arrayOf(
+		WuejMapsView.longitudeInOne(location.longitude).toUInt(),
+		WuejMapsView.latitudeInOne(location.latitude).toUInt()
 	) + OrientationRelative.orientation.map { f -> f.toRawBits().toUInt() })
 		.joinToString(",")
 		.toByteArray()
@@ -239,7 +239,7 @@ class WuejMapsActivity : StackedActivity() {
 		.run { mapOf(
 			"task" to "location_240830_set_and_get",
 			"name" to chaschig.first { p -> p[1] == xuh }[0],
-			"loca" to this
+			"loca" to this,
 		) }
 		.run { JSONObject(this) }
 		.toString()
@@ -283,7 +283,7 @@ class WuejMapsActivity : StackedActivity() {
 		return false
 	}
 	private fun locateMyself() = LocationRelative.location?.let {
-		mapsView.set_camera_location(it)
+		mapsView.setCameraLocation(it)
 		mapsView.pixInOne = max(mapsView.pixInOne, 0x200000.toDouble())
 	} ?: run {
 		Toast.makeText(this, R.string.maps_location_unavailable, Toast.LENGTH_SHORT).show()

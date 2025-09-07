@@ -1,7 +1,8 @@
 <resources>
 	<string name="app_name">位_0</string>
 	<string name="main_maps">輿圖</string>
-	<string name="main_setting">諸置</string>
+	<string name="main_setting">設置</string>
+	<string name="main_update">更新</string>
 	<string name="maps_unknown_longitude">某經</string>
 	<string name="maps_unknown_latitude">某緯</string>
 	<string name="maps_location_unavailable">失位矣</string>
@@ -9,19 +10,19 @@
 	<string name="setting_provider_network">网絡</string>
 	<string name="setting_provider_gps">GPS</string>
 	<string name="setting_provider_gps_hardware">GPS 硬件</string>
-	<string name="setting_provider_passive">受</string>
-	<string name="setting_provider_fused">混</string>
-	<string name="setting_min_time">隙時</string>
-	<string name="setting_min_time_0">短</string>
+	<string name="setting_provider_passive">被動</string>
+	<string name="setting_provider_fused">混合</string>
+	<string name="setting_min_time">相隔時間</string>
+	<string name="setting_min_time_0">儘短</string>
 	<string name="setting_min_time_1">4096ms</string>
 	<string name="setting_min_time_2">16384ms</string>
 	<string name="setting_min_time_3">65536ms</string>
-	<string name="setting_min_distance">隙距</string>
-	<string name="setting_min_distance_0">短</string>
+	<string name="setting_min_distance">相隔距離</string>
+	<string name="setting_min_distance_0">儘短</string>
 	<string name="setting_min_distance_1">4m</string>
 	<string name="setting_min_distance_2">16m</string>
 	<string name="setting_min_distance_3">64m</string>
-	<string name="setting_server_addr">服務致</string>
+	<string name="setting_server_addr">服務器地址</string>
 	<string name="setting_maps_source">圖源</string>
 	<string name="setting_maps_source_tian_dih_tuq">天地圖</string>
 	<string name="setting_maps_source_giq_linq_i">吉林一號</string>
@@ -37,8 +38,14 @@
 	<string name="setting_maps_source_tencent_styleid_4">騰訊4</string>
 	<string name="setting_maps_source_tencent_styleid_8">騰訊8</string>
 	<string name="setting_maps_source_tencent_styleid_9">騰訊9</string>
-	<string name="setting_download_caching">下載匿</string>
-	<string name="setting_download_caching_clear">清</string>
-	<string name="setting_download_caching_trim">裁</string>
-	<string name="setting_download_cached">已匿 %s</string>
+	<string name="setting_download_caching">下載匿存</string>
+	<string name="setting_download_caching_clear">清空</string>
+	<string name="setting_download_caching_trim">裁剪</string>
+	<string name="setting_download_cached">已匿存 %s</string>
+	<string name="update_download_info">此処可以从輸入旳网址下載文件、並保存到指定路徑。</string>
+	<string name="update_input_address">在此輸入网址</string>
+	<string name="update_download">選擇路徑並下載到彼処</string>
+	<string name="update_download_title">用「位_0」下載</string>
+	<string name="update_install_info">此処可以从指定位置旳安裝包文件中安裝、更新應用。</string>
+	<string name="update_install">選擇路徑並从彼処安裝</string>
 </resources>
