@@ -5,7 +5,7 @@ import android.graphics.BitmapFactory
 import com.buhzzi.wuej_0.SettingActivity
 import java.nio.file.attribute.BasicFileAttributes
 import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.createDirectory
+import kotlin.io.path.createDirectories
 import kotlin.io.path.deleteExisting
 import kotlin.io.path.deleteRecursively
 import kotlin.io.path.div
@@ -15,7 +15,6 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.isDirectory
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.notExists
 import kotlin.io.path.outputStream
 import kotlin.io.path.readAttributes
 
@@ -27,7 +26,7 @@ class DownloadCaching {
 		private fun concatXyz(x: Int, y: Int, z: Int) = arrayOf(x, y, z).joinToString(".") { it.toString(16).padStart(8) }
 
 		init {
-			downloadCachingDirPath.createDirectory()
+			downloadCachingDirPath.createDirectories()
 		}
 
 		fun calcCachedSize() = downloadCachingDirPath.listDirectoryEntries()
@@ -38,9 +37,7 @@ class DownloadCaching {
 			.sum()
 
 		fun writeMapTile(source: String, x: Int, y: Int, z: Int, bmp: Bitmap) = (downloadCachingDirPath / source).runCatching {
-			if (notExists()) {
-				createDirectory()
-			}
+			createDirectories()
 			(this / concatXyz(x, y, z)).outputStream().use {
 				bmp.compress(Bitmap.CompressFormat.PNG, 100, it)
 			}
@@ -50,17 +47,13 @@ class DownloadCaching {
 			it.printStackTrace()
 		}.isSuccess
 
-		fun readMapTile(source: String, x: Int, y: Int, z: Int) = (downloadCachingDirPath / source).takeIf {
-			it.exists()
-		}?.run {
-			this / concatXyz(x, y, z)
-		}?.takeIf {
-			it.exists()
-		}?.run {
-			inputStream().use {
-				BitmapFactory.decodeStream(it)
+		fun readMapTile(source: String, x: Int, y: Int, z: Int) = (downloadCachingDirPath / source / concatXyz(x, y, z))
+			.takeIf { it.exists() }
+			?.run {
+				inputStream().use {
+					BitmapFactory.decodeStream(it)
+				}
 			}
-		}
 
 		fun listFilesByAccessTime() = downloadCachingDirPath.listDirectoryEntries()
 			.asSequence()
