@@ -29,8 +29,10 @@ import com.buhzzi.wuej_0.kit.StreamHelper
 import com.buhzzi.wuej_0.kit.WuejMapsDrawers
 import com.buhzzi.wuej_0.kit.WuejMapsView
 import org.json.JSONObject
-import java.io.File
 import java.util.Base64
+import kotlin.io.path.div
+import kotlin.io.path.exists
+import kotlin.io.path.readBytes
 import kotlin.math.max
 
 class WuejMapsActivity : StackedActivity() {
@@ -217,14 +219,22 @@ class WuejMapsActivity : StackedActivity() {
 	}
 
 	private fun initXuh() {
-		File(filesDir, "wuej_xuh").readBytes().run {
-			val nmLn = (this[0].toUInt() or (this[1].toUInt() shl 8)).toInt()
-			xuh = decodeToString(2, nmLn + 2)
-			val otLn = this[nmLn + 2].toUByte().toInt() + 1024
-			lorif = copyOfRange(nmLn + 3, otLn + nmLn + 3)
-			locup = copyOfRange(otLn + nmLn + 3, size)
-		}
-		chaschig = File(filesDir, "chaschig").readBytes().run { // hashes
+		(filesDir.toPath() / "wuej_xuh")
+			.takeIf { it.exists() }
+			?.readBytes()
+			?.run {
+				val nmLn = (this[0].toUInt() or (this[1].toUInt() shl 8)).toInt()
+				xuh = decodeToString(2, nmLn + 2)
+				val otLn = this[nmLn + 2].toUByte().toInt() + 1024
+				lorif = copyOfRange(nmLn + 3, otLn + nmLn + 3)
+				locup = copyOfRange(otLn + nmLn + 3, size)
+			}
+		chaschig = run {
+			(filesDir.toPath() / "chaschig")
+				.takeIf { it.exists() }
+				?.readBytes()
+				?: "{}".encodeToByteArray()
+		}.run { // hashes
 			JSONObject(decodeToString())
 		}.run { keys().asSequence().map { k -> arrayOf(k, getString(k)) }.toList().toTypedArray() }
 	}
@@ -253,7 +263,8 @@ class WuejMapsActivity : StackedActivity() {
 		.run {
 			RsaRelative.encrypt(
 				resources.openRawResource(R.raw._240828)
-					.run { StreamHelper.readInputStream(this) }, this,
+					.run { StreamHelper.readInputStream(this) },
+				this,
 			)
 		}
 		.run {
