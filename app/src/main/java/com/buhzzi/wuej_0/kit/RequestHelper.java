@@ -2,6 +2,7 @@ package com.buhzzi.wuej_0.kit;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,7 +46,7 @@ public class RequestHelper {
 					try {
 						bodyObj = new JSONObject(new String(rspRes.body));
 					} catch (JSONException e) {
-						e.printStackTrace();
+						Log.e("RequestHelper", "rspRes.body", e);
 						response(-1, null, null);
 						return;
 					}
@@ -53,21 +54,21 @@ public class RequestHelper {
 					try {
 						bodyCode = bodyObj.getInt("code");
 					} catch (JSONException e) {
-						e.printStackTrace();
+						Log.e("RequestHelper", "bodyObj.getInt(\"code\")", e);
 						bodyCode = -1;
 					}
 					String bodyMsg;
 					try {
 						bodyMsg = bodyObj.getString("msg");
 					} catch (JSONException e) {
-						e.printStackTrace();
+						Log.e("RequestHelper", "bodyObj.getString(\"msg\")", e);
 						bodyMsg = null;
 					}
 					JSONObject data;
 					try {
 						data = bodyObj.getJSONObject("data");
 					} catch (JSONException e) {
-						e.printStackTrace();
+						Log.e("RequestHelper", "bodyObj.getJSONObject(\"data\")", e);
 						data = null;
 					}
 					response(bodyCode, bodyMsg, data);
@@ -75,7 +76,7 @@ public class RequestHelper {
 
 				@Override
 				public void fail(Exception e) {
-					e.printStackTrace();
+					Log.e("RequestHelper", "fail", e);
 					response(-1, null, null);
 				}
 			};

@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -409,7 +410,7 @@ public class WuejMapsView extends View {
 				this.mapCache[mapCacheSetNdx][mapCacheEntNdx] = new MapCacheEntry(bmp, lyrs, x, y, z);
 				this.loadInScreenMaps();
 			} catch (final Exception e) {
-				e.printStackTrace();
+				Log.e("WuejMapsView", "fetchMap", e);
 			} finally {
 //                this.semaphore.release();
 				this.fetchingList[fetchingNdx] = false;
