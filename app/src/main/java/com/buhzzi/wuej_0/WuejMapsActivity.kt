@@ -63,6 +63,36 @@ class WuejMapsActivity : StackedActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
+		if (ensureLocatingPermission()) {
+			initWithLocatingPermission()
+		}
+	}
+
+	override fun onDestroy() {
+		super.onDestroy()
+
+		if (::locatingRunnable.isInitialized) {
+			locatingHandler.removeCallbacks(locatingRunnable)
+		}
+
+		LocationRelative.stopUpdatingLocation()
+		OrientationRelative.stopUpdatingOrientation()
+	}
+
+	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String?>, grantResults: IntArray) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+		if (requestCode == REQUEST_LOCATING_PERMISSION_CODE) {
+			if (
+				grantResults.isNotEmpty() &&
+				grantResults[0] == PackageManager.PERMISSION_GRANTED
+			) {
+				initWithLocatingPermission()
+			}
+		}
+	}
+
+	private fun initWithLocatingPermission() {
 		setContentView(R.layout.wuej_maps_activity)
 		initMapsView()
 		initXuh()
@@ -81,7 +111,9 @@ class WuejMapsActivity : StackedActivity() {
 				longiTxt.text = LocationConverter.longitudeToFrac(it.longitude)
 				latiTxt.text = LocationConverter.latitudeToFrac(it.latitude)
 
-				setAndGetLocations(it)
+				if (::lorif.isInitialized && ::locup.isInitialized) {
+					setAndGetLocations(it)
+				}
 			} ?: run {
 				longiTxt.text = getString(R.string.maps_unknown_longitude)
 				latiTxt.text = getString(R.string.maps_unknown_latitude)
@@ -92,15 +124,6 @@ class WuejMapsActivity : StackedActivity() {
 
 		LocationRelative.startUpdatingLocation()
 		OrientationRelative.startUpdatingOrientation()
-	}
-
-	override fun onDestroy() {
-		super.onDestroy()
-
-		locatingHandler.removeCallbacks(locatingRunnable)
-
-		LocationRelative.stopUpdatingLocation()
-		OrientationRelative.stopUpdatingOrientation()
 	}
 
 	private fun initMapsView() {
@@ -306,14 +329,22 @@ class WuejMapsActivity : StackedActivity() {
 		) {
 			return true
 		}
-		ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 0x24022116)
+		ActivityCompat.requestPermissions(
+			this,
+			arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+			REQUEST_LOCATING_PERMISSION_CODE,
+		)
 		return false
 	}
 
 	private fun locateMyself() = LocationRelative.location?.let {
 		mapsView.setCameraLocation(it)
-		mapsView.pixInOne = max(mapsView.pixInOne, 0x200000.toDouble())
+		mapsView.pixInOne = max(mapsView.pixInOne, 0x20000.toDouble())
 	} ?: run {
 		Toast.makeText(this, R.string.maps_location_unavailable, Toast.LENGTH_SHORT).show()
+	}
+
+	companion object {
+		private const val REQUEST_LOCATING_PERMISSION_CODE = 0x24022116
 	}
 }
