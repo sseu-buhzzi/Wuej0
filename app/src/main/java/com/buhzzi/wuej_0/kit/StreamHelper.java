@@ -6,9 +6,9 @@ import java.util.ArrayList;
 
 public class StreamHelper {
 	public static byte[] readInputStream(InputStream is) throws IOException {
-		final int block_size = 8192;
+		final int blockSize = 8192;
 		final ArrayList<byte[]> blocks = new ArrayList<>();
-		byte[] block = new byte[block_size];
+		byte[] block = new byte[blockSize];
 		int off = 0;
 		while (true) {
 			final int b = is.read();
@@ -16,23 +16,23 @@ public class StreamHelper {
 				break;
 			}
 			block[off++] = (byte) b;
-			if (off == block_size) {
+			if (off == blockSize) {
 				{
 					blocks.add(block);
-					block = new byte[block_size];
+					block = new byte[blockSize];
 					off = 0;
 				}
 			}
 		}
-		final long length = (long) blocks.size() * block_size + off;
+		final long length = (long) blocks.size() * blockSize + off;
 		if (length > Integer.MAX_VALUE) {
 			throw new IOException("Stream longer than 4 GiB");
 		}
 		final byte[] result = new byte[(int) length];
 		int dstOff = 0;
-		for (final byte[] block_ref : blocks) {
-			System.arraycopy(block_ref, 0, result, dstOff, block_size);
-			dstOff += block_size;
+		for (final byte[] blockRef : blocks) {
+			System.arraycopy(blockRef, 0, result, dstOff, blockSize);
+			dstOff += blockSize;
 		}
 		System.arraycopy(block, 0, result, (int) length - off, off);
 		return result;

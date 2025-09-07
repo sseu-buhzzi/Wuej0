@@ -53,19 +53,19 @@ public class WuejMapsView extends View {
 	public static Bitmap noDataBmp = Bitmap.createBitmap(128, 128, Bitmap.Config.ARGB_8888);
 
 	static {
-		final Canvas no_data_cv = new Canvas(noDataBmp);
-		no_data_cv.drawColor(ColorRelative.Companion.getColorBack());
-		final String no_data_str = "NO DATA";
+		final Canvas noDataCv = new Canvas(noDataBmp);
+		noDataCv.drawColor(ColorRelative.Companion.getColorBack());
+		final String noDataStr = "NO DATA";
 		final Paint paint = new Paint();
 		paint.setColor(ColorRelative.Companion.getColorFore());
 		paint.setTextSize(32);
 		paint.setTypeface(FontConstants.Companion.getXeuTf());
 		final Rect bounds = new Rect();
-		paint.getTextBounds(no_data_str, 0, no_data_str.length(), bounds);
-		no_data_cv.drawText(no_data_str, (noDataBmp.getWidth() - (bounds.right - bounds.left)) >> 1, (noDataBmp.getHeight() + (bounds.bottom - bounds.top)) >> 1, paint);
+		paint.getTextBounds(noDataStr, 0, noDataStr.length(), bounds);
+		noDataCv.drawText(noDataStr, (noDataBmp.getWidth() - (bounds.right - bounds.left)) >> 1, (noDataBmp.getHeight() + (bounds.bottom - bounds.top)) >> 1, paint);
 		paint.setStyle(Paint.Style.STROKE);
 		paint.setColor(0xffff0000);
-		no_data_cv.drawRect(0, 0, noDataBmp.getWidth(), noDataBmp.getHeight(), paint);
+		noDataCv.drawRect(0, 0, noDataBmp.getWidth(), noDataBmp.getHeight(), paint);
 	}
 
 	public static Paint contactStrokePaint = new Paint();
@@ -129,13 +129,13 @@ public class WuejMapsView extends View {
 	public Handler motionHandler = new Handler(Looper.getMainLooper());
 	public Runnable motionRunnable = () -> {
 		this.motionHandler.postDelayed(this.motionRunnable, 64);
-		final double d_x_in_one = ((long) this.dXInOne << 36) / this.pixInOne;
-		final double d_y_in_one = ((long) this.dYInOne << 36) / this.pixInOne;
-		final double sin_rotation = Math.sin(this.rotation);
-		final double cos_rotation = Math.cos(this.rotation);
+		final double dXInOne = ((long) this.dXInOne << 36) / this.pixInOne;
+		final double dYInOne = ((long) this.dYInOne << 36) / this.pixInOne;
+		final double sinRotation = Math.sin(this.rotation);
+		final double cosRotation = Math.cos(this.rotation);
 		this.pixInOne = Double.min(Double.max(this.pixInOne * Math.pow(1.0625, this.dPixInOne), 2048), 0x80000000L);
-		this.xInOne = this.xInOne + (long) (d_x_in_one * cos_rotation + d_y_in_one * sin_rotation) & 0x00000000ffffffffL;
-		this.yInOne = this.yInOne + (long) (d_y_in_one * cos_rotation - d_x_in_one * sin_rotation) & 0x00000000ffffffffL;
+		this.xInOne = this.xInOne + (long) (dXInOne * cosRotation + dYInOne * sinRotation) & 0x00000000ffffffffL;
+		this.yInOne = this.yInOne + (long) (dYInOne * cosRotation - dXInOne * sinRotation) & 0x00000000ffffffffL;
 		this.rotation += this.dRotation * 0.0625F;
 		this.rotation = this.rotation >= 0 ? this.rotation % 6.2831855F : this.rotation % 6.2831855F + 6.2831855F;
 		if (((this.dPixInOne | Float.floatToRawIntBits(this.dRotation)) | (Double.doubleToRawLongBits(this.dXInOne) | Double.doubleToRawLongBits(this.dYInOne))) != 0) {
@@ -146,9 +146,9 @@ public class WuejMapsView extends View {
 	public WuejMapsView(Context ctx, AttributeSet attrs) {
 		super(ctx, attrs);
 
-		for (int x_ndx = 0; x_ndx < MAPS_GRID_COL_NUMB; ++x_ndx) {
-			for (int y_ndx = 0; y_ndx < MAPS_GRID_ROW_NUMB; ++y_ndx) {
-				this.mapsGrid[x_ndx][y_ndx] = new BitmapWithBounds();
+		for (int xNdx = 0; xNdx < MAPS_GRID_COL_NUMB; ++xNdx) {
+			for (int yNdx = 0; yNdx < MAPS_GRID_ROW_NUMB; ++yNdx) {
+				this.mapsGrid[xNdx][yNdx] = new BitmapWithBounds();
 			}
 		}
 
@@ -363,36 +363,36 @@ public class WuejMapsView extends View {
 		this.invalidate();
 	}
 
-	private Bitmap transitToFetchMapButWhoKnowsWhatsFrom240827(CharSequence lyrs, int x, int x_off, int y, int y_off, int z) {
+	private Bitmap transitToFetchMapButWhoKnowsWhatsFrom240827(CharSequence lyrs, int x, int xOff, int y, int yOff, int z) {
 		// (1 << z) - 1 is the mask of no excess bits in current zoom level.
-		return fetchMap(lyrs, x + x_off & (1 << z) - 1, y + y_off & (1 << z) - 1, z);
+		return fetchMap(lyrs, x + xOff & (1 << z) - 1, y + yOff & (1 << z) - 1, z);
 	}
 
 	public Bitmap fetchMap(final CharSequence lyrs, final int x, final int y, final int z) {
 		final int mapCacheSetNdx = getMapCacheSet(x, y);
 		final int mapCacheEntNdx;
 		{
-			final MapCacheEntry[] map_cache_set = this.mapCache[mapCacheSetNdx];
+			final MapCacheEntry[] mapCacheSet = this.mapCache[mapCacheSetNdx];
 			int ndx = -1;
-			int evict_ndx = 0;
+			int evictNdx = 0;
 			while (true) {
 				if (++ndx == MAP_CACHE_ASSOCIATIVITY) {
-					mapCacheEntNdx = evict_ndx;
+					mapCacheEntNdx = evictNdx;
 					break;
 				}
-				if (map_cache_set[ndx] == null) {
+				if (mapCacheSet[ndx] == null) {
 					mapCacheEntNdx = ndx;
 					break;
 				}
-				if (map_cache_set[ndx].hit(lyrs, x, y, z)) {
-					return map_cache_set[ndx].bmp;
+				if (mapCacheSet[ndx].hit(lyrs, x, y, z)) {
+					return mapCacheSet[ndx].bmp;
 				}
-				if (map_cache_set[ndx].refTime < map_cache_set[evict_ndx].refTime) {
-					evict_ndx = ndx;
+				if (mapCacheSet[ndx].refTime < mapCacheSet[evictNdx].refTime) {
+					evictNdx = ndx;
 				}
 			}
 		}
-		final int fetching_ndx;
+		final int fetchingNdx;
 		{
 			int ndx = -1;
 			do {
@@ -400,7 +400,7 @@ public class WuejMapsView extends View {
 					return null;
 				}
 			} while (this.fetchingList[ndx]);
-			this.fetchingList[fetching_ndx = ndx] = true;
+			this.fetchingList[fetchingNdx = ndx] = true;
 		}
 		new Thread(() -> {
 			try {
@@ -412,7 +412,7 @@ public class WuejMapsView extends View {
 				e.printStackTrace();
 			} finally {
 //                this.semaphore.release();
-				this.fetchingList[fetching_ndx] = false;
+				this.fetchingList[fetchingNdx] = false;
 			}
 		}).start();
 		return null;

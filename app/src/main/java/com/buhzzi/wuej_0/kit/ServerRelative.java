@@ -41,11 +41,11 @@ public class ServerRelative {
 
 	public static byte[] requestWrap(final long reqCode, final byte[] reqbdyData) {
 		final byte[] reqData = new byte[reqbdyData.length + 12];
-		final java.nio.ByteBuffer req_buf = java.nio.ByteBuffer.allocate(12);
-		req_buf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
-		req_buf.putLong(reqCode ^ 0x374447374d4245ffL);
-		req_buf.putInt(reqData.length);
-		java.lang.System.arraycopy(req_buf.array(), 0, reqData, 0, 12);
+		final java.nio.ByteBuffer reqBuf = java.nio.ByteBuffer.allocate(12);
+		reqBuf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+		reqBuf.putLong(reqCode ^ 0x374447374d4245ffL);
+		reqBuf.putInt(reqData.length);
+		java.lang.System.arraycopy(reqBuf.array(), 0, reqData, 0, 12);
 		java.lang.System.arraycopy(reqbdyData, 0, reqData, 12, reqbdyData.length);
 		return reqData;
 	}
@@ -60,10 +60,10 @@ public class ServerRelative {
 				serverOs.write(requestWrap(reqCode, reqbdyData));
 				rspCallback.accept(StreamHelper.readInputStream(serverIs));
 			} catch (final java.lang.Exception e) {
-				final byte[] e_data = e.toString().getBytes();
-				final byte[] rspData = new byte[e_data.length + 4];
+				final byte[] eData = e.toString().getBytes();
+				final byte[] rspData = new byte[eData.length + 4];
 				rspData[0] = rspData[1] = rspData[2] = rspData[3] = -1;
-				java.lang.System.arraycopy(e_data, 0, rspData, 4, e_data.length);
+				java.lang.System.arraycopy(eData, 0, rspData, 4, eData.length);
 				rspCallback.accept(rspData);
 			}
 		}).start();
